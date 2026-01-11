@@ -1,7 +1,5 @@
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import { Streamdown } from 'streamdown';
 import type { Message } from '@/stores/chatStore';
-import { CodeBlock } from './CodeBlock';
 
 interface MessageItemProps {
   message: Message;
@@ -19,8 +17,8 @@ export function MessageItem({ message, isStreaming }: MessageItemProps) {
           isUser ? 'bg-primary-600' : 'bg-gradient-to-br from-primary-500 to-primary-700'
         }`}
       >
-        <span className="text-white text-sm font-medium">
-          {isUser ? 'U' : 'C'}
+        <span className="text-white text-sm font-medium font-mono">
+          {isUser ? 'U' : 'cc'}
         </span>
       </div>
 
@@ -40,33 +38,10 @@ export function MessageItem({ message, isStreaming }: MessageItemProps) {
           {isUser ? (
             <p className="whitespace-pre-wrap">{message.content}</p>
           ) : (
-            <div className="prose prose-invert prose-sm max-w-none">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  code: ({ className, children, ...props }) => {
-                    const match = /language-(\w+)/.exec(className || '');
-                    const isInline = !match;
-
-                    if (isInline) {
-                      return (
-                        <code className="bg-gray-700 px-1.5 py-0.5 rounded text-sm" {...props}>
-                          {children}
-                        </code>
-                      );
-                    }
-
-                    return (
-                      <CodeBlock
-                        code={String(children).replace(/\n$/, '')}
-                        language={match[1]}
-                      />
-                    );
-                  },
-                }}
-              >
+            <div className="prose prose-invert prose-sm max-w-none streamdown-content">
+              <Streamdown>
                 {message.content}
-              </ReactMarkdown>
+              </Streamdown>
               {isStreaming && !message.content && (
                 <span className="inline-block w-2 h-4 bg-gray-400 animate-pulse" />
               )}

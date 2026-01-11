@@ -1,16 +1,104 @@
-import { Header } from '@/components/Layout/Header';
 import { ChatContainer } from '@/components/Chat/ChatContainer';
 import { TerminalContainer } from '@/components/Terminal/TerminalContainer';
+import { ActivityBar } from '@/components/Layout/ActivityBar';
+import { Sidebar } from '@/components/Sidebar/Sidebar';
+import { LoginScreen } from '@/components/Auth/LoginScreen';
 import { useAppStore } from '@/stores/appStore';
 
-function App() {
-  const mode = useAppStore((state) => state.mode);
+function MainContent() {
+  const { mode, activeActivity, setMode, user, setAuthenticated, setUser } = useAppStore();
+
+  // Sync mode with activity selection
+  const effectiveMode = activeActivity === 'chat' ? 'chat' : activeActivity === 'terminal' ? 'terminal' : mode;
+
+  // Update mode when activity changes
+  if (activeActivity === 'chat' && mode !== 'chat') {
+    setMode('chat');
+  } else if (activeActivity === 'terminal' && mode !== 'terminal') {
+    setMode('terminal');
+  }
 
   return (
-    <div className="flex flex-col h-screen bg-dark-bg">
-      <Header />
-      <main className="flex-1 overflow-hidden">
-        {mode === 'chat' ? <ChatContainer /> : <TerminalContainer />}
+    <div className="flex flex-col h-full">
+      {/* Tab bar */}
+      <div className="flex items-center justify-between bg-dark-surface border-b border-dark-border h-9">
+        <div className="flex items-center h-full">
+          {/* Tabs */}
+          <button
+            onClick={() => setMode('terminal')}
+            className={`flex items-center gap-2 px-4 h-full text-sm border-r border-dark-border transition-colors ${
+              effectiveMode === 'terminal'
+                ? 'bg-dark-bg text-white'
+                : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+            Terminal
+          </button>
+          <button
+            onClick={() => setMode('chat')}
+            className={`flex items-center gap-2 px-4 h-full text-sm border-r border-dark-border transition-colors ${
+              effectiveMode === 'chat'
+                ? 'bg-dark-bg text-white'
+                : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+            </svg>
+            AI Chat
+          </button>
+        </div>
+
+        {/* User info */}
+        {user && (
+          <div className="flex items-center gap-3 px-4">
+            <span className="text-xs text-gray-500">{user.email}</span>
+            <span className="text-xs px-2 py-0.5 bg-primary-500/20 text-primary-400 rounded">
+              {user.plan}
+            </span>
+            <button
+              onClick={() => {
+                setAuthenticated(false);
+                setUser(null);
+              }}
+              className="text-xs text-gray-500 hover:text-white transition-colors"
+            >
+              Logout
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-hidden">
+        {effectiveMode === 'chat' ? <ChatContainer /> : <TerminalContainer />}
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const isAuthenticated = useAppStore((state) => state.isAuthenticated);
+
+  // Show login screen if not authenticated
+  if (!isAuthenticated) {
+    return <LoginScreen />;
+  }
+
+  return (
+    <div className="flex h-screen bg-dark-bg">
+      {/* Activity Bar (left icons) */}
+      <ActivityBar />
+
+      {/* Sidebar */}
+      <Sidebar />
+
+      {/* Main content area */}
+      <main className="flex-1 flex flex-col overflow-hidden">
+        <MainContent />
       </main>
     </div>
   );
