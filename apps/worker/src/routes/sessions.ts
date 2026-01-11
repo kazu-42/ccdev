@@ -10,6 +10,16 @@ const sessions = new Hono<{ Bindings: Env }>();
 // All session routes require authentication
 sessions.use('*', authMiddleware);
 
+// List all sessions for current user (across all projects)
+sessions.get('/', async (c) => {
+  const user = getCurrentUser(c);
+  const limit = parseInt(c.req.query('limit') || '50', 10);
+  const offset = parseInt(c.req.query('offset') || '0', 10);
+
+  const userSessions = await sessionQueries.findByUserId(c.env.DB, user.id, limit, offset);
+  return c.json({ sessions: userSessions });
+});
+
 // Get session by ID (for resume)
 sessions.get('/:id', async (c) => {
   const sessionId = c.req.param('id');

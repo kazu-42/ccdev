@@ -119,6 +119,18 @@ export const sessionQueries = {
     return result.results;
   },
 
+  async findByUserId(db: D1Database, userId: string, limit = 50, offset = 0): Promise<(Session & { project_name: string })[]> {
+    const result = await db.prepare(`
+      SELECT s.*, p.name as project_name
+      FROM sessions s
+      JOIN projects p ON s.project_id = p.id
+      WHERE p.user_id = ?
+      ORDER BY s.created_at DESC
+      LIMIT ? OFFSET ?
+    `).bind(userId, limit, offset).all<Session & { project_name: string }>();
+    return result.results;
+  },
+
   async findLatestByProjectId(db: D1Database, projectId: string): Promise<Session | null> {
     const result = await db.prepare('SELECT * FROM sessions WHERE project_id = ? ORDER BY created_at DESC LIMIT 1')
       .bind(projectId).first<Session>();

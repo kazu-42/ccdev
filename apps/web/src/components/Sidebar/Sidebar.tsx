@@ -3,6 +3,7 @@ import { useProjectStore } from '@/stores/projectStore';
 import { FileTree } from './FileTree';
 import { ProjectSelector } from '@/components/Project/ProjectSelector';
 import { SettingsPanel } from '@/components/Settings/SettingsPanel';
+import { ChatHistoryPanel } from '@/components/Chat/ChatHistoryPanel';
 
 export function Sidebar() {
   const { activeActivity, sidebarWidth } = useAppStore();
@@ -46,11 +47,7 @@ export function Sidebar() {
       {/* Panel content */}
       <div className="flex-1 overflow-hidden">
         {activeActivity === 'files' && <FileTree />}
-        {activeActivity === 'chat' && (
-          <div className="p-4 text-sm text-gray-400">
-            <p>AI Chat sessions will appear here.</p>
-          </div>
-        )}
+        {activeActivity === 'chat' && <ChatHistoryPanel />}
         {activeActivity === 'terminal' && (
           <div className="p-4 text-sm text-gray-400 space-y-3">
             {currentProject ? (

@@ -27,6 +27,16 @@ export interface Message {
   createdAt: Date;
 }
 
+export interface ChatSession {
+  id: string;
+  project_id: string;
+  project_name?: string;
+  terminal_session_id: string | null;
+  chat_history: string | null;
+  created_at: string;
+  ended_at: string | null;
+}
+
 interface ChatState {
   messages: Message[];
   isLoading: boolean;
@@ -34,6 +44,12 @@ interface ChatState {
   streamingContent: string;
   currentToolCalls: ToolCall[];
   currentToolResults: ToolResult[];
+
+  // Session management
+  currentSessionId: string | null;
+  currentProjectId: string | null;
+  sessions: ChatSession[];
+  sessionsLoading: boolean;
 
   // Actions
   sendMessage: (content: string) => Promise<void>;
@@ -43,6 +59,13 @@ interface ChatState {
   finalizeMessage: () => void;
   clearMessages: () => void;
   setError: (error: string | null) => void;
+
+  // Session actions
+  setCurrentSession: (sessionId: string, projectId: string) => void;
+  loadSessions: () => Promise<void>;
+  loadSession: (sessionId: string) => Promise<void>;
+  saveSessionHistory: () => Promise<void>;
+  createNewSession: (projectId: string) => Promise<ChatSession | null>;
 }
 
 const generateId = () => Math.random().toString(36).substring(2, 15);
@@ -54,6 +77,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
   streamingContent: '',
   currentToolCalls: [],
   currentToolResults: [],
+
+  // Session management state
+  currentSessionId: null,
+  currentProjectId: null,
+  sessions: [],
+  sessionsLoading: false,
 
   sendMessage: async (content: string) => {
     const { messages } = get();
@@ -212,6 +241,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
         currentToolResults: [],
         isLoading: false,
       });
+
+      // Auto-save to backend after message finalization
+      setTimeout(() => {
+        get().saveSessionHistory();
+      }, 100);
     } else {
       set({
         streamingContent: '',
@@ -234,5 +268,137 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   setError: (error: string | null) => {
     set({ error, isLoading: false });
+  },
+
+  // Session management actions
+  setCurrentSession: (sessionId: string, projectId: string) => {
+    set({
+      currentSessionId: sessionId,
+      currentProjectId: projectId,
+    });
+  },
+
+  loadSessions: async () => {
+    set({ sessionsLoading: true });
+    try {
+      const response = await fetch(`${API_BASE}/api/sessions`, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to load sessions');
+      }
+
+      const data = await response.json();
+      set({ sessions: data.sessions, sessionsLoading: false });
+    } catch (err) {
+      console.error('Failed to load sessions:', err);
+      set({ sessionsLoading: false });
+    }
+  },
+
+  loadSession: async (sessionId: string) => {
+    set({ isLoading: true });
+    try {
+      const response = await fetch(`${API_BASE}/api/sessions/${sessionId}`, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to load session');
+      }
+
+      const data = await response.json();
+      const session = data.session as ChatSession;
+
+      // Parse chat history
+      let messages: Message[] = [];
+      if (session.chat_history) {
+        try {
+          const parsed = JSON.parse(session.chat_history);
+          messages = parsed.map((m: {
+            id?: string;
+            role: 'user' | 'assistant';
+            content: string;
+            toolCalls?: ToolCall[];
+            toolResults?: ToolResult[];
+            createdAt?: string;
+          }) => ({
+            ...m,
+            id: m.id || generateId(),
+            createdAt: m.createdAt ? new Date(m.createdAt) : new Date(),
+          }));
+        } catch {
+          console.error('Failed to parse chat history');
+        }
+      }
+
+      set({
+        messages,
+        currentSessionId: session.id,
+        currentProjectId: session.project_id,
+        isLoading: false,
+        error: null,
+      });
+    } catch (err) {
+      const error = err as Error;
+      set({ error: error.message, isLoading: false });
+    }
+  },
+
+  saveSessionHistory: async () => {
+    const { currentSessionId, messages } = get();
+    if (!currentSessionId || messages.length === 0) return;
+
+    try {
+      // Serialize messages for storage
+      const chatHistory = JSON.stringify(
+        messages.map((m) => ({
+          id: m.id,
+          role: m.role,
+          content: m.content,
+          toolCalls: m.toolCalls,
+          toolResults: m.toolResults,
+          createdAt: m.createdAt.toISOString(),
+        }))
+      );
+
+      await fetch(`${API_BASE}/api/sessions/${currentSessionId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ chat_history: chatHistory }),
+      });
+    } catch (err) {
+      console.error('Failed to save session history:', err);
+    }
+  },
+
+  createNewSession: async (projectId: string) => {
+    try {
+      const response = await fetch(`${API_BASE}/api/projects/${projectId}/sessions`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create session');
+      }
+
+      const data = await response.json();
+      const session = data.session as ChatSession;
+
+      set({
+        currentSessionId: session.id,
+        currentProjectId: projectId,
+        messages: [],
+        error: null,
+      });
+
+      return session;
+    } catch (err) {
+      console.error('Failed to create session:', err);
+      return null;
+    }
   },
 }));
