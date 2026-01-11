@@ -22,10 +22,23 @@ new_sqlite_classes = ["TerminalSession"]
 # binding = "SESSIONS"
 # id = "your-kv-id"
 
-# Sandbox binding (Phase 3)
-# Enable via Cloudflare dashboard when available
-# [sandbox]
-# binding = "SANDBOX"
+# Sandbox SDK (Phase 3)
+# Based on https://developers.cloudflare.com/sandbox/get-started/
+# Requires: Dockerfile in project root, Sandbox Durable Object class
+#
+# [[containers]]
+# class_name = "Sandbox"
+# image = "./Dockerfile"
+# instance_type = "lite"
+# max_instances = 1
+#
+# [[durable_objects.bindings]]
+# name = "Sandbox"
+# class_name = "Sandbox"
+#
+# [[migrations]]
+# tag = "v2"
+# new_sqlite_classes = ["Sandbox"]
 
 # Production environment
 [env.production]
