@@ -4,8 +4,9 @@
 
 - Node.js 20+
 - pnpm 9+
-- Docker（Sandbox開発用）
-- Cloudflareアカウント
+- Cloudflareアカウント（デプロイ時のみ）
+
+> **Note**: ローカル開発では Docker は不要です。コード実行はクライアントサイド（JavaScript: eval、Python: Pyodide）で行われます。
 
 ---
 
@@ -27,55 +28,13 @@ pnpm install
 ### 3. 環境変数設定
 
 ```bash
-# ルートに.envを作成
-cp .env.example .env
-
 # apps/worker/.dev.varsを作成（ローカルSecrets）
-echo "ANTHROPIC_API_KEY=sk-ant-your-key" > apps/worker/.dev.vars
+echo "ANTHROPIC_API_KEY=your-api-key-here" > apps/worker/.dev.vars
 ```
 
-### 4. Cloudflare認証
+> **重要**: Anthropic APIキーが必要です。https://console.anthropic.com/ で取得できます。
 
-```bash
-npx wrangler login
-```
-
-### 5. KV/D1作成（初回のみ）
-
-```bash
-# KVネームスペース作成
-cd apps/worker
-npx wrangler kv:namespace create SESSIONS
-npx wrangler kv:namespace create SESSIONS --preview
-
-# D1データベース作成
-npx wrangler d1 create claude-code-db
-cd ../..
-```
-
-`wrangler.toml`に出力されたIDを設定：
-
-```toml
-[[kv_namespaces]]
-binding = "SESSIONS"
-id = "your-kv-id"
-preview_id = "your-preview-id"
-
-[[d1_databases]]
-binding = "DB"
-database_name = "claude-code-db"
-database_id = "your-d1-id"
-```
-
-### 6. D1マイグレーション
-
-```bash
-cd apps/worker
-npx wrangler d1 execute claude-code-db --local --file=./migrations/0001_initial.sql
-cd ../..
-```
-
-### 7. 開発サーバー起動
+### 4. 開発サーバー起動
 
 ```bash
 pnpm dev
@@ -143,30 +102,17 @@ npx wrangler tail  # ログ監視
 
 ---
 
-## Sandboxローカル開発
+## コード実行について
 
-Cloudflare Sandbox SDKはローカルでDockerを使用します。
+### 現在の実装
 
-### Docker起動確認
+- **JavaScript**: クライアントサイドで実行（console.logをキャプチャ）
+- **Python**: Pyodide（WebAssembly）でブラウザ内実行
+- **TypeScript**: 将来的にサーバーサイドでコンパイル＆実行予定
 
-```bash
-docker --version
-docker ps
-```
+### 本番環境（将来）
 
-### 初回実行
-
-初回の`pnpm dev`実行時、Sandboxコンテナのビルドに2-3分かかります。
-
-### トラブルシューティング
-
-```bash
-# Dockerデーモン起動確認
-docker info
-
-# コンテナリセット
-docker system prune -f
-```
+Cloudflare Sandbox SDKを使用したサーバーサイド実行を計画中。
 
 ---
 
@@ -215,13 +161,6 @@ npx wrangler --version
 
 # 最新版に更新
 pnpm add -D wrangler@latest -w
-```
-
-### D1接続エラー
-
-```bash
-# ローカルD1リセット
-rm -rf apps/worker/.wrangler/state
 ```
 
 ---
