@@ -1,8 +1,8 @@
 {
-  "name": "claude-code-web",
+  "name": "ccdev",
   "version": "0.1.0",
   "private": true,
-  "description": "Self-hosted Claude Code Web - Browser-based AI coding environment with Cloudflare Sandbox",
+  "description": "ccdev - Web Terminal with Cloudflare Sandbox for isolated code execution",
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",

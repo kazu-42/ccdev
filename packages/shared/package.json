@@ -1,5 +1,5 @@
 {
-  "name": "@claude-code-web/shared",
+  "name": "@ccdev/shared",
   "version": "0.1.0",
   "private": true,
   "type": "module",
