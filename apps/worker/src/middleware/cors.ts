@@ -27,6 +27,12 @@ export async function corsMiddleware(c: Context, next: Next) {
 
   await next();
 
+  // Skip CORS headers for WebSocket upgrade responses (status 101)
+  // WebSocket responses have immutable headers
+  if (c.res.status === 101) {
+    return;
+  }
+
   // Add CORS headers to response
   c.res.headers.set('Access-Control-Allow-Origin', allowedOrigin);
   c.res.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
