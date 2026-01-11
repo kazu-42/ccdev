@@ -127,7 +127,7 @@ export function useTerminal(containerRef: React.RefObject<HTMLDivElement>, optio
 
       ws.onopen = () => {
         setConnectionStatus('connected');
-        terminalRef.current?.writeln('\x1b[32mConnected to sandbox!\x1b[0m');
+        terminalRef.current?.writeln('\x1b[32mConnected!\x1b[0m');
         terminalRef.current?.writeln('');
         // Send initial resize
         if (terminalRef.current) {

@@ -20,9 +20,9 @@ export function MessageList({ messages, streamingContent, isLoading }: MessageLi
     return (
       <div className="flex flex-col items-center justify-center h-full text-gray-400">
         <div className="w-16 h-16 mb-4 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
-          <span className="text-3xl text-white font-bold">C</span>
+          <span className="text-2xl text-white font-bold font-mono">cc</span>
         </div>
-        <h2 className="text-xl font-medium text-white mb-2">Claude Code Web</h2>
+        <h2 className="text-xl font-medium text-white mb-2">ccdev Chat</h2>
         <p className="text-sm text-center max-w-md">
           AIとチャットしながらコードを実行できます。
           <br />
