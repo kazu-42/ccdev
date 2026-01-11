@@ -1,0 +1,23 @@
+{
+  "feature_name": "claude-code-web",
+  "created_at": "2025-01-11T00:00:00Z",
+  "updated_at": "2025-01-11T00:00:00Z",
+  "language": "ja",
+  "phase": "tasks_generated",
+  "description": "Claude Code Webセルフホスト版 - Cloudflare Sandbox上で動作するブラウザベースのAI対話・コード実行環境",
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
