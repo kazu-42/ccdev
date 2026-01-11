@@ -70,6 +70,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const decoder = new TextDecoder();
       let buffer = '';
 
+      let currentEvent = '';
+      let finalized = false;
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -79,21 +82,30 @@ export const useChatStore = create<ChatState>((set, get) => ({
         buffer = lines.pop() || '';
 
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
+          if (line.startsWith('event: ')) {
+            currentEvent = line.slice(7).trim();
+          } else if (line.startsWith('data: ')) {
             try {
               const data = JSON.parse(line.slice(6));
-              if (data.content) {
+              if (currentEvent === 'message' && data.content) {
                 get().appendStreamContent(data.content);
+              } else if (currentEvent === 'done') {
+                get().finalizeMessage();
+                finalized = true;
+              } else if (currentEvent === 'error') {
+                set({ error: data.message || 'Unknown error', isLoading: false });
+                finalized = true;
               }
             } catch {
               // Skip invalid JSON
             }
-          } else if (line.startsWith('event: done')) {
-            get().finalizeMessage();
-          } else if (line.startsWith('event: error')) {
-            // Handle error event
           }
         }
+      }
+
+      // Ensure message is finalized when stream ends
+      if (!finalized && get().streamingContent) {
+        get().finalizeMessage();
       }
     } catch (err) {
       const error = err as Error;
