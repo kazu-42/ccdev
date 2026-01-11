@@ -1,4 +1,5 @@
-import { Context, Next } from 'hono';
+import type { Context, Next } from 'hono';
+import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import type { APIError } from '../types';
 
 export async function errorMiddleware(c: Context, next: Next) {
@@ -8,13 +9,13 @@ export async function errorMiddleware(c: Context, next: Next) {
     console.error('Error:', err);
 
     const error = err as Error;
-    const status = (err as { status?: number }).status || 500;
+    const statusCode = (err as { status?: number }).status || 500;
 
     const response: APIError = {
-      error: status >= 500 ? 'internal_error' : 'request_error',
+      error: statusCode >= 500 ? 'internal_error' : 'request_error',
       message: error.message || 'An unexpected error occurred',
     };
 
-    return c.json(response, status);
+    return c.json(response, statusCode as ContentfulStatusCode);
   }
 }

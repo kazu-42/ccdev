@@ -1,12 +1,27 @@
 import { useState } from 'react';
+import { useCodeExecution } from '@/hooks/useCodeExecution';
+import { OutputPanel } from '@/components/Output/OutputPanel';
 
 interface CodeBlockProps {
   code: string;
   language: string;
 }
 
+type ExecutableLanguage = 'javascript' | 'typescript' | 'python';
+
+const LANGUAGE_MAP: Record<string, ExecutableLanguage> = {
+  javascript: 'javascript',
+  js: 'javascript',
+  typescript: 'typescript',
+  ts: 'typescript',
+  python: 'python',
+  py: 'python',
+};
+
 export function CodeBlock({ code, language }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
+  const [showOutput, setShowOutput] = useState(false);
+  const { execute, isExecuting, result, clearResult } = useCodeExecution();
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(code);
@@ -14,9 +29,20 @@ export function CodeBlock({ code, language }: CodeBlockProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const isExecutable = ['javascript', 'js', 'typescript', 'ts', 'python', 'py'].includes(
-    language.toLowerCase()
-  );
+  const normalizedLang = language.toLowerCase();
+  const executableLang = LANGUAGE_MAP[normalizedLang];
+  const isExecutable = !!executableLang;
+
+  const handleRun = async () => {
+    if (!executableLang) return;
+    setShowOutput(true);
+    await execute(code, executableLang);
+  };
+
+  const handleCloseOutput = () => {
+    setShowOutput(false);
+    clearResult();
+  };
 
   return (
     <div className="relative group my-2">
@@ -26,13 +52,15 @@ export function CodeBlock({ code, language }: CodeBlockProps) {
         <div className="flex gap-2">
           {isExecutable && (
             <button
-              className="text-xs text-gray-400 hover:text-white transition-colors"
-              onClick={() => {
-                // TODO: Implement code execution
-                console.log('Execute:', code);
-              }}
+              className={`text-xs transition-colors ${
+                isExecuting
+                  ? 'text-primary-400 cursor-wait'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+              onClick={handleRun}
+              disabled={isExecuting}
             >
-              Run
+              {isExecuting ? 'Running...' : 'Run'}
             </button>
           )}
           <button
@@ -48,6 +76,15 @@ export function CodeBlock({ code, language }: CodeBlockProps) {
       <pre className="!mt-0 !rounded-t-none overflow-x-auto">
         <code className={`language-${language}`}>{code}</code>
       </pre>
+
+      {/* Output Panel */}
+      {showOutput && (
+        <OutputPanel
+          result={result}
+          isExecuting={isExecuting}
+          onClose={handleCloseOutput}
+        />
+      )}
     </div>
   );
 }

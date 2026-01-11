@@ -39,6 +39,9 @@ pnpm-debug.log*
 coverage/
 .nyc_output/
 
+# Turborepo
+.turbo/
+
 # Misc
 *.tgz
 .cache/
