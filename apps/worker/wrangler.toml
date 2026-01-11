@@ -23,7 +23,7 @@ new_sqlite_classes = ["TerminalSession"]
 # id = "your-kv-id"
 
 # Sandbox binding (Phase 3)
-# Uncomment when Sandbox SDK is available in your account
+# Enable via Cloudflare dashboard when available
 # [sandbox]
 # binding = "SANDBOX"
 
