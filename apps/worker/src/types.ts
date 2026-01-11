@@ -14,7 +14,7 @@ export interface Env {
   TERMINAL_SESSION: DurableObjectNamespace;
 
   // Sandbox (when available)
-  // SANDBOX: unknown;
+  SANDBOX?: unknown;
 }
 
 // Message types
