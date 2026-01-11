@@ -1,0 +1,8 @@
+# Proxy API requests to Worker
+/api/*  https://ccdev-api.ghive42.workers.dev/api/:splat  200
+
+# WebSocket proxy
+/ws/*  https://ccdev-api.ghive42.workers.dev/ws/:splat  200
+
+# SPA fallback - all other routes go to index.html
+/*  /index.html  200

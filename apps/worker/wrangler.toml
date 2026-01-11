@@ -6,13 +6,15 @@ compatibility_flags = ["nodejs_compat"]
 # Environment variables (non-secret)
 [vars]
 ENVIRONMENT = "development"
+CF_ACCESS_TEAM_DOMAIN = "https://ghive.cloudflareaccess.com"
+CF_ACCESS_POLICY_AUD = "ca61b42b-c966-40e9-9a4c-3ea9b16c982c"
 
 # Sandbox Container Configuration
 [[containers]]
 class_name = "Sandbox"
 image = "./Dockerfile"
-instance_type = "standard-1"
-max_instances = 5
+instance_type = "basic"
+max_instances = 10
 
 # Durable Objects
 [[durable_objects.bindings]]
@@ -30,7 +32,14 @@ new_sqlite_classes = ["TerminalSession"]
 
 [[migrations]]
 tag = "v2"
-new_sqlite_classes = ["Sandbox"]
+# Empty migration to maintain compatibility
+
+
+# D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "ccdev-db"
+database_id = "4af28394-3fcf-4c3a-bdb7-078711f54ba3"
 
 # KV Namespaces - IDs need to be set after creation
 # Run: npx wrangler kv:namespace create SESSIONS

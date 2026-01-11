@@ -4,11 +4,15 @@ export interface Env {
   ENVIRONMENT: string;
   ANTHROPIC_API_KEY: string;
 
+  // Cloudflare Access configuration
+  CF_ACCESS_TEAM_DOMAIN?: string;  // e.g., https://ghive.cloudflareaccess.com
+  CF_ACCESS_POLICY_AUD?: string;   // Application Audience Tag
+
   // KV Namespaces
   SESSIONS?: KVNamespace;
 
   // D1 Database
-  DB?: D1Database;
+  DB: D1Database;
 
   // Durable Objects
   TERMINAL_SESSION: DurableObjectNamespace;

@@ -118,8 +118,9 @@ export function useTerminal(containerRef: React.RefObject<HTMLDivElement>, optio
 
     setConnectionStatus('connecting');
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws/terminal/${sessionId}`;
+    // Use configured WS URL or fall back to current host
+    const wsBaseUrl = import.meta.env.VITE_WS_URL || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`;
+    const wsUrl = `${wsBaseUrl}/ws/terminal/${sessionId}`;
 
     try {
       const ws = new WebSocket(wsUrl);

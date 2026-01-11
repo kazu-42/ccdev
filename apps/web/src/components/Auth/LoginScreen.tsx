@@ -1,38 +1,45 @@
-import { useState } from 'react';
-import { useAppStore } from '@/stores/appStore';
+import { useState, useEffect } from 'react';
+import { useAuthStore } from '@/stores/authStore';
 
 export function LoginScreen() {
   const [email, setEmail] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const { setAuthenticated, setUser } = useAppStore();
+  const { user, isLoading, error, devLogin, fetchCurrentUser, clearError } = useAuthStore();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  // Try to fetch current user on mount (for Cloudflare Access auth)
+  useEffect(() => {
+    fetchCurrentUser();
+  }, [fetchCurrentUser]);
+
+  // Clear error when email changes
+  useEffect(() => {
+    if (error) clearError();
+  }, [email, clearError, error]);
+
+  const handleDevLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setIsLoading(true);
+    if (!email || isLoading) return;
 
-    // Simulate login - in production, this would call an auth API
-    setTimeout(() => {
-      if (email.includes('@')) {
-        setUser({ email, plan: 'Max' });
-        setAuthenticated(true);
-      } else {
-        setError('Please enter a valid email address');
-      }
-      setIsLoading(false);
-    }, 1000);
+    try {
+      await devLogin(email);
+    } catch {
+      // Error is already set in store
+    }
   };
 
-  const handleGoogleLogin = () => {
-    setIsLoading(true);
-    // Simulate OAuth - in production, this would redirect to Google OAuth
-    setTimeout(() => {
-      setUser({ email: 'user@gmail.com', plan: 'Max' });
-      setAuthenticated(true);
-      setIsLoading(false);
-    }, 1500);
+  const handleCloudflareAccess = () => {
+    // Redirect to the protected route - Cloudflare Access will handle auth
+    // After auth, the user will be redirected back with the JWT in headers
+    window.location.href = '/';
   };
+
+  // If authenticated, show loading/redirecting
+  if (user) {
+    return (
+      <div className="min-h-screen bg-dark-bg flex items-center justify-center">
+        <div className="text-white">Redirecting...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-dark-bg flex items-center justify-center p-4">
@@ -51,35 +58,22 @@ export function LoginScreen() {
           <div className="text-center mb-6">
             <h2 className="text-xl font-semibold text-white mb-2">Sign in to continue</h2>
             <p className="text-sm text-gray-400">
-              Requires Claude Code Max subscription
+              Use Cloudflare Access or development login
             </p>
           </div>
 
-          {/* Google Sign In */}
+          {/* Cloudflare Access Sign In */}
           <button
-            onClick={handleGoogleLogin}
+            onClick={handleCloudflareAccess}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 bg-white text-gray-800 font-medium py-3 px-4 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+            className="w-full flex items-center justify-center gap-3 bg-orange-500 text-white font-medium py-3 px-4 rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-4"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path
-                fill="#4285F4"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-              />
-              <path
-                fill="#EA4335"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-              />
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16.5088 16.8447C16.7178 16.1955 16.6383 15.4855 16.2913 14.8979C15.9443 14.3103 15.3682 13.9024 14.7024 13.7736L7.72715 12.4751C7.62487 12.4545 7.53362 12.4007 7.46771 12.3224C7.4018 12.2441 7.3651 12.146 7.36341 12.0445C7.36172 11.943 7.39515 11.8439 7.45838 11.7635C7.52162 11.6831 7.61089 11.6261 7.71246 11.6022L14.7614 9.9247C15.4288 9.76549 16.0013 9.33053 16.3384 8.72387C16.6754 8.11721 16.7483 7.39458 16.5399 6.7293L15.9949 5.00155C15.9632 4.90058 15.9012 4.81224 15.8178 4.7487C15.7344 4.68516 15.6336 4.64937 15.5289 4.6462H5.0929C4.17527 4.6462 3.29505 5.01022 2.64584 5.65943C1.99663 6.30864 1.63261 7.18886 1.63261 8.10649V15.8935C1.63261 16.8112 1.99663 17.6914 2.64584 18.3406C3.29505 18.9898 4.17527 19.3538 5.0929 19.3538H15.5303C15.6351 19.3506 15.7358 19.3148 15.8193 19.2513C15.9027 19.1877 15.9647 19.0994 15.9963 18.9984L16.5088 16.8447Z"/>
+              <path d="M19.4362 16.8447C19.6452 16.1955 19.5657 15.4855 19.2187 14.8979C18.8717 14.3103 18.2956 13.9024 17.6298 13.7736L17.3169 13.7125L17.0755 14.6051C16.9206 15.1856 16.6113 15.7133 16.1805 16.1349C15.7497 16.5566 15.2126 16.8566 14.6241 16.9992L7.67503 18.6767C7.57347 18.7006 7.48419 18.7576 7.42096 18.838C7.35772 18.9184 7.32429 19.0176 7.32598 19.119C7.32767 19.2205 7.36438 19.3186 7.43028 19.3969C7.49619 19.4752 7.58745 19.529 7.68973 19.5496L17.6298 21.3736C18.2956 21.5024 18.8717 21.1103 19.2187 20.5227C19.5657 19.9351 19.6452 19.2251 19.4362 18.5759L19.4362 16.8447Z"/>
+              <path d="M22.3687 8.10649C22.3687 7.18886 22.0047 6.30864 21.3555 5.65943C20.7063 5.01022 19.8261 4.6462 18.9084 4.6462H17.6313L17.8727 5.53879C18.0276 6.11924 18.337 6.64697 18.7677 7.06858C19.1985 7.4902 19.7357 7.79027 20.3242 7.93289L21.6918 8.26068C21.794 8.28464 21.8833 8.34164 21.9467 8.42197C22.01 8.5023 22.0434 8.60145 22.0417 8.70292L22.0417 15.8935C22.0403 15.995 22.0037 16.0931 21.9377 16.1714C21.8718 16.2497 21.7806 16.3035 21.6783 16.324L20.3107 16.6518C19.7222 16.7944 19.185 17.0945 18.7543 17.5161C18.3235 17.9377 18.0141 18.4654 17.8592 19.0459L17.6313 19.8774H18.9084C19.8261 19.8774 20.7063 19.5134 21.3555 18.8642C22.0047 18.215 22.3687 17.3348 22.3687 16.4171V8.10649Z"/>
             </svg>
-            {isLoading ? 'Signing in...' : 'Continue with Google'}
+            {isLoading ? 'Checking...' : 'Continue with Cloudflare Access'}
           </button>
 
           <div className="relative my-6">
@@ -87,12 +81,12 @@ export function LoginScreen() {
               <div className="w-full border-t border-dark-border" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-dark-surface text-gray-500">or</span>
+              <span className="px-4 bg-dark-surface text-gray-500">or development login</span>
             </div>
           </div>
 
-          {/* Email Sign In */}
-          <form onSubmit={handleLogin}>
+          {/* Dev Email Sign In */}
+          <form onSubmit={handleDevLogin}>
             <div className="mb-4">
               <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
                 Email address
@@ -102,7 +96,7 @@ export function LoginScreen() {
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
+                placeholder="dev@example.com"
                 className="w-full bg-dark-bg border border-dark-border rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                 disabled={isLoading}
               />
@@ -119,19 +113,16 @@ export function LoginScreen() {
               disabled={isLoading || !email}
               className="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white font-medium py-3 px-4 rounded-lg hover:from-primary-600 hover:to-primary-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Signing in...' : 'Continue with Email'}
+              {isLoading ? 'Signing in...' : 'Continue with Dev Login'}
             </button>
           </form>
 
-          {/* Plan info */}
+          {/* Environment info */}
           <div className="mt-6 pt-6 border-t border-dark-border">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-400">Required plan:</span>
-              <span className="flex items-center gap-2 text-primary-400 font-medium">
-                <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                  <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
-                </svg>
-                Claude Code Max
+              <span className="text-gray-400">Environment:</span>
+              <span className="text-xs px-2 py-1 bg-yellow-900/30 text-yellow-400 rounded">
+                Development
               </span>
             </div>
           </div>

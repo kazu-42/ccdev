@@ -24,6 +24,7 @@ export default {
           bg: '#1a1a2e',
           surface: '#16213e',
           border: '#0f3460',
+          hover: '#1e2a4a',
         },
       },
       fontFamily: {

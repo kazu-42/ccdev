@@ -16,14 +16,6 @@ interface AppState {
   // Sidebar width
   sidebarWidth: number;
   setSidebarWidth: (width: number) => void;
-
-  // Authentication state
-  isAuthenticated: boolean;
-  setAuthenticated: (authenticated: boolean) => void;
-
-  // User info
-  user: { email: string; plan: string } | null;
-  setUser: (user: { email: string; plan: string } | null) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -40,22 +32,13 @@ export const useAppStore = create<AppState>()(
       // Sidebar width
       sidebarWidth: 260,
       setSidebarWidth: (width) => set({ sidebarWidth: width }),
-
-      // Authentication - default to false (require login)
-      isAuthenticated: false,
-      setAuthenticated: (authenticated) => set({ isAuthenticated: authenticated }),
-
-      // User info
-      user: null,
-      setUser: (user) => set({ user }),
     }),
     {
       name: 'ccdev-app-storage',
+      version: 2, // Increment to clear old auth state from localStorage
       partialize: (state) => ({
         sidebarWidth: state.sidebarWidth,
         activeActivity: state.activeActivity,
-        isAuthenticated: state.isAuthenticated,
-        user: state.user,
       }),
     }
   )

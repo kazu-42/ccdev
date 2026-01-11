@@ -1,8 +1,12 @@
 import { useAppStore } from '@/stores/appStore';
+import { useProjectStore } from '@/stores/projectStore';
 import { FileTree } from './FileTree';
+import { ProjectSelector } from '@/components/Project/ProjectSelector';
+import { SettingsPanel } from '@/components/Settings/SettingsPanel';
 
 export function Sidebar() {
   const { activeActivity, sidebarWidth } = useAppStore();
+  const { currentProject, currentSession } = useProjectStore();
 
   if (!activeActivity) {
     return null;
@@ -20,6 +24,11 @@ export function Sidebar() {
       className="flex flex-col bg-dark-surface border-r border-dark-border"
       style={{ width: sidebarWidth }}
     >
+      {/* Project Selector */}
+      <div className="px-3 py-3 border-b border-dark-border">
+        <ProjectSelector />
+      </div>
+
       {/* Panel header */}
       <div className="flex items-center justify-between px-4 h-9 border-b border-dark-border">
         <span className="text-xs font-medium text-gray-400 tracking-wider">
@@ -43,33 +52,30 @@ export function Sidebar() {
           </div>
         )}
         {activeActivity === 'terminal' && (
-          <div className="p-4 text-sm text-gray-400">
-            <p>Terminal sessions will appear here.</p>
+          <div className="p-4 text-sm text-gray-400 space-y-3">
+            {currentProject ? (
+              <>
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">Current Project</div>
+                  <div className="text-white font-medium">{currentProject.name}</div>
+                </div>
+                {currentSession && (
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1">Session ID</div>
+                    <div className="text-xs font-mono text-gray-400">{currentSession.terminal_session_id}</div>
+                  </div>
+                )}
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">Sandbox ID</div>
+                  <div className="text-xs font-mono text-gray-400">{currentProject.sandbox_id}</div>
+                </div>
+              </>
+            ) : (
+              <p>Select a project to start a terminal session.</p>
+            )}
           </div>
         )}
-        {activeActivity === 'settings' && (
-          <div className="p-4 text-sm text-gray-400">
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-white font-medium mb-2">Theme</h3>
-                <select className="w-full bg-dark-bg border border-dark-border rounded px-2 py-1 text-sm">
-                  <option value="dark">Dark</option>
-                  <option value="light">Light</option>
-                </select>
-              </div>
-              <div>
-                <h3 className="text-white font-medium mb-2">Font Size</h3>
-                <input
-                  type="range"
-                  min="12"
-                  max="20"
-                  defaultValue="14"
-                  className="w-full"
-                />
-              </div>
-            </div>
-          </div>
-        )}
+        {activeActivity === 'settings' && <SettingsPanel />}
       </div>
     </div>
   );

@@ -6,6 +6,10 @@ import { errorMiddleware } from './middleware/error';
 import { chatRouter } from './routes/chat';
 import { executeRouter } from './routes/execute';
 import { terminalRouter } from './routes/terminal';
+import authRoutes from './routes/auth';
+import projectRoutes from './routes/projects';
+import sessionRoutes from './routes/sessions';
+import adminRoutes from './routes/admin';
 
 // Re-export Durable Objects
 export { TerminalSession } from './durable-objects/TerminalSession';
@@ -30,6 +34,10 @@ app.get('/health', (c) => {
 // API routes
 app.route('/api/chat', chatRouter);
 app.route('/api/execute', executeRouter);
+app.route('/api/auth', authRoutes);
+app.route('/api/projects', projectRoutes);
+app.route('/api/sessions', sessionRoutes);
+app.route('/api/admin', adminRoutes);
 
 // WebSocket routes (no CORS needed)
 app.route('/ws/terminal', terminalRouter);

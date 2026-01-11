@@ -1,22 +1,51 @@
+import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ChatContainer } from '@/components/Chat/ChatContainer';
 import { TerminalContainer } from '@/components/Terminal/TerminalContainer';
 import { ActivityBar } from '@/components/Layout/ActivityBar';
 import { Sidebar } from '@/components/Sidebar/Sidebar';
 import { LoginScreen } from '@/components/Auth/LoginScreen';
 import { useAppStore } from '@/stores/appStore';
+import { useAuthStore } from '@/stores/authStore';
+import { useProjectStore } from '@/stores/projectStore';
+
+// Admin pages
+import { AdminDashboard } from '@/pages/Admin/Dashboard';
+import { AdminUsers } from '@/pages/Admin/Users';
+import { AdminProjects } from '@/pages/Admin/Projects';
+import { AdminPermissions } from '@/pages/Admin/Permissions';
+
+// Loading screen component
+function LoadingScreen() {
+  return (
+    <div className="min-h-screen bg-dark-bg flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-gray-400">Loading...</p>
+      </div>
+    </div>
+  );
+}
 
 function MainContent() {
-  const { mode, activeActivity, setMode, user, setAuthenticated, setUser } = useAppStore();
+  const { mode, activeActivity, setMode } = useAppStore();
+  const { user, logout } = useAuthStore();
 
   // Sync mode with activity selection
   const effectiveMode = activeActivity === 'chat' ? 'chat' : activeActivity === 'terminal' ? 'terminal' : mode;
 
   // Update mode when activity changes
-  if (activeActivity === 'chat' && mode !== 'chat') {
-    setMode('chat');
-  } else if (activeActivity === 'terminal' && mode !== 'terminal') {
-    setMode('terminal');
-  }
+  useEffect(() => {
+    if (activeActivity === 'chat' && mode !== 'chat') {
+      setMode('chat');
+    } else if (activeActivity === 'terminal' && mode !== 'terminal') {
+      setMode('terminal');
+    }
+  }, [activeActivity, mode, setMode]);
+
+  const handleLogout = async () => {
+    await logout();
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -56,14 +85,23 @@ function MainContent() {
         {user && (
           <div className="flex items-center gap-3 px-4">
             <span className="text-xs text-gray-500">{user.email}</span>
-            <span className="text-xs px-2 py-0.5 bg-primary-500/20 text-primary-400 rounded">
-              {user.plan}
+            <span className={`text-xs px-2 py-0.5 rounded ${
+              user.role === 'admin'
+                ? 'bg-red-500/20 text-red-400'
+                : 'bg-primary-500/20 text-primary-400'
+            }`}>
+              {user.role}
             </span>
+            {user.role === 'admin' && (
+              <a
+                href="/admin"
+                className="text-xs text-gray-500 hover:text-white transition-colors"
+              >
+                Admin
+              </a>
+            )}
             <button
-              onClick={() => {
-                setAuthenticated(false);
-                setUser(null);
-              }}
+              onClick={handleLogout}
               className="text-xs text-gray-500 hover:text-white transition-colors"
             >
               Logout
@@ -80,13 +118,13 @@ function MainContent() {
   );
 }
 
-function App() {
-  const isAuthenticated = useAppStore((state) => state.isAuthenticated);
+function AuthenticatedApp() {
+  const { fetchProjects } = useProjectStore();
 
-  // Show login screen if not authenticated
-  if (!isAuthenticated) {
-    return <LoginScreen />;
-  }
+  // Fetch projects on mount
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   return (
     <div className="flex h-screen bg-dark-bg">
@@ -101,6 +139,62 @@ function App() {
         <MainContent />
       </main>
     </div>
+  );
+}
+
+// Protected admin route wrapper
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { user } = useAuthStore();
+
+  if (!user || user.role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+function AppRoutes() {
+  return (
+    <Routes>
+      {/* Main app */}
+      <Route path="/" element={<AuthenticatedApp />} />
+
+      {/* Admin routes */}
+      <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+      <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+      <Route path="/admin/projects" element={<AdminRoute><AdminProjects /></AdminRoute>} />
+      <Route path="/admin/permissions" element={<AdminRoute><AdminPermissions /></AdminRoute>} />
+
+      {/* Catch all */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
+function App() {
+  const { user, isLoading, isInitialized, fetchCurrentUser } = useAuthStore();
+
+  // Initialize auth state on mount
+  useEffect(() => {
+    if (!isInitialized) {
+      fetchCurrentUser();
+    }
+  }, [isInitialized, fetchCurrentUser]);
+
+  // Show loading screen while initializing
+  if (!isInitialized || isLoading) {
+    return <LoadingScreen />;
+  }
+
+  // Show login screen if not authenticated
+  if (!user) {
+    return <LoginScreen />;
+  }
+
+  return (
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
   );
 }
 

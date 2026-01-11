@@ -344,22 +344,26 @@ will be available when Sandbox is enabled.\x1b[0m
 
   private async executeSandboxCommand(ws: WebSocket, command: string): Promise<void> {
     try {
-      const sandbox = await getSandbox(this.env.Sandbox);
+      // Use a short unique ID for the sandbox (8 chars like official example)
+      const sandboxId = this.state.id.toString().slice(0, 8);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sandbox = getSandbox(this.env.Sandbox as any, sandboxId);
 
-      const result = await sandbox.exec('bash', ['-c', command], {
-        timeout: 30000,
-        cwd: this.cwd,
-        env: {
-          TERM: 'xterm-256color',
-          HOME: '/workspace',
-          USER: 'sandbox',
-          SHELL: '/bin/bash',
-        },
-        onOutput: (chunk: string) => {
-          // Stream output in real-time
-          this.send(ws, { type: 'output', data: chunk.replace(/\n/g, '\r\n') });
-        },
-      });
+      // Build command with cd prefix if not in default directory
+      const fullCommand = this.cwd !== '/workspace'
+        ? `cd ${this.cwd} && ${command}`
+        : command;
+
+      // Use simple exec() without streaming (matches official example pattern)
+      const result = await sandbox.exec(fullCommand);
+
+      // Send output based on success/failure
+      if (result.stdout) {
+        this.send(ws, { type: 'output', data: result.stdout.replace(/\n/g, '\r\n') });
+      }
+      if (result.stderr) {
+        this.send(ws, { type: 'output', data: `\x1b[31m${result.stderr.replace(/\n/g, '\r\n')}\x1b[0m` });
+      }
 
       // Send exit code if non-zero
       if (result.exitCode !== 0) {
@@ -371,13 +375,17 @@ will be available when Sandbox is enabled.\x1b[0m
 
       // Update cwd if command was cd
       if (command.trim().startsWith('cd ')) {
-        // Try to get the new directory
-        const cdResult = await sandbox.exec('bash', ['-c', 'pwd'], {
-          timeout: 5000,
-          cwd: this.cwd,
-        });
-        if (cdResult.exitCode === 0 && cdResult.stdout) {
-          this.cwd = cdResult.stdout.trim();
+        const cdArg = command.trim().substring(3).trim();
+        if (cdArg === '~' || cdArg === '') {
+          this.cwd = '/workspace';
+        } else if (cdArg.startsWith('/')) {
+          this.cwd = cdArg;
+        } else if (cdArg === '..') {
+          const parts = this.cwd.split('/').filter(Boolean);
+          parts.pop();
+          this.cwd = '/' + parts.join('/') || '/';
+        } else {
+          this.cwd = this.cwd === '/' ? '/' + cdArg : this.cwd + '/' + cdArg;
         }
       }
     } catch (error) {
