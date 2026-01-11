@@ -14,6 +14,8 @@
 | 2 | [プロジェクト管理](#2-プロジェクト管理) | 2026-01-12 | `project-management/` |
 | 3 | [管理パネル](#3-管理パネル) | 2026-01-12 | `admin-panel/` |
 | 4 | [設定パネル](#4-設定パネル) | 2026-01-12 | `settings-panel/` |
+| 5 | [AI Tool Use](#5-ai-tool-use) | 2026-01-12 | `ai-tool-use/` |
+| 6 | [チャット履歴](#6-チャット履歴) | 2026-01-12 | `chat-history/` |
 
 ---
 
@@ -112,8 +114,59 @@ JWT認証とdev-loginによる開発用認証を実装。
 
 ---
 
+### 5. AI Tool Use
+
+**完了日:** 2026-01-12
+**ディレクトリ:** `ai-tool-use/`
+
+Claude AIがFunction Calling (Tool Use) でコード実行・ファイル操作を自動的に行う機能。
+
+**実装内容:**
+- execute_code ツール（サンドボックスでコード実行）
+- read_file / write_file ツール（ファイル操作）
+- ツール定義とスキーマ
+- SSEストリーミングでのtool_use/tool_result処理
+- YOLOモード（自動承認機能）
+- アジェンティックループ（複数ツール連続実行）
+
+**関連ファイル:**
+- `apps/worker/src/routes/chat.ts`
+- `apps/worker/src/tools/definitions.ts`
+- `apps/worker/src/tools/executor.ts`
+- `apps/web/src/stores/chatStore.ts`
+- `apps/web/src/stores/settingsStore.ts`
+- `apps/web/src/components/Settings/SettingsPanel.tsx`
+
+---
+
+### 6. チャット履歴
+
+**完了日:** 2026-01-12
+**ディレクトリ:** `chat-history/`
+
+チャットセッションの履歴をD1データベースに永続化し、過去の会話を再開できる機能。
+
+**実装内容:**
+- セッション一覧API (`GET /api/sessions`)
+- セッション詳細API (`GET /api/sessions/:id`)
+- 履歴更新API (`PATCH /api/sessions/:id`)
+- chatStoreにセッション管理機能追加
+- ChatHistoryPanelコンポーネント
+- 自動保存（メッセージfinalize後）
+- 過去セッションの読み込み・再開
+
+**関連ファイル:**
+- `apps/worker/src/routes/sessions.ts`
+- `apps/worker/src/db/queries.ts`
+- `apps/web/src/stores/chatStore.ts`
+- `apps/web/src/components/Chat/ChatHistoryPanel.tsx`
+- `apps/web/src/components/Sidebar/Sidebar.tsx`
+
+---
+
 ## 更新履歴
 
 | 日付 | 更新内容 |
 |------|----------|
+| 2026-01-12 | AI Tool Use、チャット履歴を完了として追加 |
 | 2026-01-12 | 初回作成、4機能を完了として登録 |

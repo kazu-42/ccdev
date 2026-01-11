@@ -2,12 +2,14 @@ import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ChatContainer } from '@/components/Chat/ChatContainer';
 import { TerminalContainer } from '@/components/Terminal/TerminalContainer';
+import { FileViewer } from '@/components/Editor/FileViewer';
 import { ActivityBar } from '@/components/Layout/ActivityBar';
 import { Sidebar } from '@/components/Sidebar/Sidebar';
 import { LoginScreen } from '@/components/Auth/LoginScreen';
 import { useAppStore } from '@/stores/appStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useProjectStore } from '@/stores/projectStore';
+import { useFileStore } from '@/stores/fileStore';
 
 // Admin pages
 import { AdminDashboard } from '@/pages/Admin/Dashboard';
@@ -30,9 +32,10 @@ function LoadingScreen() {
 function MainContent() {
   const { mode, activeActivity, setMode } = useAppStore();
   const { user, logout } = useAuthStore();
+  const { selectedFile } = useFileStore();
 
   // Sync mode with activity selection
-  const effectiveMode = activeActivity === 'chat' ? 'chat' : activeActivity === 'terminal' ? 'terminal' : mode;
+  const effectiveMode = activeActivity === 'chat' ? 'chat' : activeActivity === 'terminal' ? 'terminal' : activeActivity === 'files' && selectedFile ? 'editor' : mode;
 
   // Update mode when activity changes
   useEffect(() => {
@@ -40,8 +43,10 @@ function MainContent() {
       setMode('chat');
     } else if (activeActivity === 'terminal' && mode !== 'terminal') {
       setMode('terminal');
+    } else if (activeActivity === 'files' && selectedFile && mode !== 'editor') {
+      setMode('editor');
     }
-  }, [activeActivity, mode, setMode]);
+  }, [activeActivity, mode, setMode, selectedFile]);
 
   const handleLogout = async () => {
     await logout();
@@ -79,6 +84,21 @@ function MainContent() {
             </svg>
             AI Chat
           </button>
+          {selectedFile && (
+            <button
+              onClick={() => setMode('editor')}
+              className={`flex items-center gap-2 px-4 h-full text-sm border-r border-dark-border transition-colors ${
+                effectiveMode === 'editor'
+                  ? 'bg-dark-bg text-white'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+              </svg>
+              Editor
+            </button>
+          )}
         </div>
 
         {/* User info */}
@@ -112,7 +132,9 @@ function MainContent() {
 
       {/* Content */}
       <div className="flex-1 overflow-hidden">
-        {effectiveMode === 'chat' ? <ChatContainer /> : <TerminalContainer />}
+        {effectiveMode === 'chat' && <ChatContainer />}
+        {effectiveMode === 'terminal' && <TerminalContainer />}
+        {effectiveMode === 'editor' && <FileViewer />}
       </div>
     </div>
   );

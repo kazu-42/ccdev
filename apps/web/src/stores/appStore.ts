@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type AppMode = 'chat' | 'terminal';
+export type AppMode = 'chat' | 'terminal' | 'editor';
 export type ActivityType = 'files' | 'chat' | 'terminal' | 'settings' | null;
 
 interface AppState {

@@ -10,6 +10,7 @@ import authRoutes from './routes/auth';
 import projectRoutes from './routes/projects';
 import sessionRoutes from './routes/sessions';
 import adminRoutes from './routes/admin';
+import filesRoutes from './routes/files';
 
 // Re-export Durable Objects
 export { TerminalSession } from './durable-objects/TerminalSession';
@@ -38,6 +39,7 @@ app.route('/api/auth', authRoutes);
 app.route('/api/projects', projectRoutes);
 app.route('/api/sessions', sessionRoutes);
 app.route('/api/admin', adminRoutes);
+app.route('/api/files', filesRoutes);
 
 // WebSocket routes (no CORS needed)
 app.route('/ws/terminal', terminalRouter);

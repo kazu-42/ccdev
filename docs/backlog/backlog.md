@@ -12,55 +12,20 @@
 
 | # | 機能名 | 優先度 | 状態 | ディレクトリ |
 |---|--------|--------|------|--------------|
-| 1 | [AI Tool Use](#1-ai-tool-use) | P0 | **着手中** | `ai-tool-use/` |
-| 2 | [チャット履歴](#2-チャット履歴) | P0 | 未着手 | `chat-history/` |
-| 3 | [Sandbox CLI Tools](#3-sandbox-cli-tools) | P1 | 設定UIのみ | `sandbox-cli-tools/` |
-| 4 | [Cloudflare Access認証](#4-cloudflare-access認証) | P1 | 未着手 | `cloudflare-access/` |
-| 5 | [仮想ファイルシステム](#5-仮想ファイルシステム) | P1 | 未着手 | `virtual-filesystem/` |
-| 6 | [Monaco Editor](#6-monaco-editor) | P2 | 未着手 | `monaco-editor/` |
-| 7 | [R2ファイルストレージ](#7-r2ファイルストレージ) | P2 | 未着手 | `r2-file-storage/` |
-| 8 | [共有ワークスペース](#8-共有ワークスペース) | P2 | 未着手 | `shared-workspace/` |
-| 9 | [多言語対応](#9-多言語対応) | P3 | 未着手 | `multi-language/` |
-| 10 | [Claude Hooks](#10-claude-hooks) | P3 | 未着手 | `claude-hooks/` |
+| 1 | [Sandbox CLI Tools](#1-sandbox-cli-tools) | P1 | 設定UIのみ | `sandbox-cli-tools/` |
+| 2 | [Cloudflare Access認証](#2-cloudflare-access認証) | P1 | 未着手 | `cloudflare-access/` |
+| 3 | [仮想ファイルシステム](#3-仮想ファイルシステム) | P1 | 未着手 | `virtual-filesystem/` |
+| 4 | [Monaco Editor](#4-monaco-editor) | P2 | 未着手 | `monaco-editor/` |
+| 5 | [R2ファイルストレージ](#5-r2ファイルストレージ) | P2 | 未着手 | `r2-file-storage/` |
+| 6 | [共有ワークスペース](#6-共有ワークスペース) | P2 | 未着手 | `shared-workspace/` |
+| 7 | [多言語対応](#7-多言語対応) | P3 | 未着手 | `multi-language/` |
+| 8 | [Claude Hooks](#8-claude-hooks) | P3 | 未着手 | `claude-hooks/` |
 
 ---
 
 ## 詳細
 
-### 1. チャット履歴
-
-**優先度:** P0 (最優先)
-**状態:** 未着手
-**ディレクトリ:** `chat-history/`
-
-チャットセッションの履歴をD1データベースに永続化し、過去の会話を再開できるようにする。
-
-**主要機能:**
-- 会話履歴のD1保存
-- セッション一覧表示
-- 過去セッションの読み込み
-- セッション検索
-- エクスポート機能
-
----
-
-### 2. AI Tool Use
-
-**優先度:** P0 (最優先)
-**状態:** 未着手
-**ディレクトリ:** `ai-tool-use/`
-
-Claude AIがFunction Calling (Tool Use) でコード実行・ファイル操作を自動的に行う機能。
-
-**主要機能:**
-- execute_code ツール定義
-- read_file / write_file ツール
-- 実行結果のAIへのフィードバック
-- ユーザー確認フロー
-
----
-
-### 3. Sandbox CLI Tools
+### 1. Sandbox CLI Tools
 
 **優先度:** P1
 **状態:** 設定UIのみ実装済み
@@ -76,7 +41,7 @@ Claude AIがFunction Calling (Tool Use) でコード実行・ファイル操作�
 
 ---
 
-### 4. Cloudflare Access認証
+### 2. Cloudflare Access認証
 
 **優先度:** P1
 **状態:** 未着手
@@ -92,7 +57,7 @@ Cloudflare AccessによるSSO認証。Google/GitHub OAuthを使った統合認�
 
 ---
 
-### 5. 仮想ファイルシステム
+### 3. 仮想ファイルシステム
 
 **優先度:** P1
 **状態:** 未着手
@@ -109,7 +74,7 @@ Cloudflare AccessによるSSO認証。Google/GitHub OAuthを使った統合認�
 
 ---
 
-### 6. Monaco Editor
+### 4. Monaco Editor
 
 **優先度:** P2
 **状態:** 未着手
@@ -126,7 +91,7 @@ VS Code同等のコードエディタをブラウザ内で提供。
 
 ---
 
-### 7. R2ファイルストレージ
+### 5. R2ファイルストレージ
 
 **優先度:** P2
 **状態:** 未着手
@@ -142,7 +107,7 @@ Cloudflare R2を使ったファイル永続化。
 
 ---
 
-### 8. 共有ワークスペース
+### 6. 共有ワークスペース
 
 **優先度:** P2
 **状態:** 未着手
@@ -158,7 +123,7 @@ Cloudflare R2を使ったファイル永続化。
 
 ---
 
-### 9. 多言語対応
+### 7. 多言語対応
 
 **優先度:** P3
 **状態:** 未着手
@@ -174,7 +139,7 @@ JavaScript/Python以外の言語サポート。
 
 ---
 
-### 10. Claude Hooks
+### 8. Claude Hooks
 
 **優先度:** P3
 **状態:** 未着手
@@ -194,4 +159,5 @@ AIコード生成後の自動検証・整形フック。
 
 | 日付 | 更新内容 |
 |------|----------|
+| 2026-01-12 | AI Tool Use、チャット履歴を完了に移動 |
 | 2026-01-12 | バックログ作成、10機能を登録 |
