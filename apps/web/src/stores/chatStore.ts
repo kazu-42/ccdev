@@ -1,9 +1,29 @@
 import { create } from 'zustand';
+import { useSettingsStore } from './settingsStore';
+
+// API base URL
+const API_BASE = import.meta.env.PROD
+  ? 'https://ccdev-api.ghive42.workers.dev'
+  : '';
+
+export interface ToolCall {
+  id: string;
+  name: string;
+  input: Record<string, unknown>;
+}
+
+export interface ToolResult {
+  tool_use_id: string;
+  content: string;
+  is_error?: boolean;
+}
 
 export interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  toolCalls?: ToolCall[];
+  toolResults?: ToolResult[];
   createdAt: Date;
 }
 
@@ -12,10 +32,14 @@ interface ChatState {
   isLoading: boolean;
   error: string | null;
   streamingContent: string;
+  currentToolCalls: ToolCall[];
+  currentToolResults: ToolResult[];
 
   // Actions
   sendMessage: (content: string) => Promise<void>;
   appendStreamContent: (content: string) => void;
+  addToolCall: (toolCall: ToolCall) => void;
+  addToolResult: (result: ToolResult) => void;
   finalizeMessage: () => void;
   clearMessages: () => void;
   setError: (error: string | null) => void;
@@ -28,9 +52,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
   isLoading: false,
   error: null,
   streamingContent: '',
+  currentToolCalls: [],
+  currentToolResults: [],
 
   sendMessage: async (content: string) => {
     const { messages } = get();
+    const { yoloMode } = useSettingsStore.getState();
 
     // Add user message
     const userMessage: Message = {
@@ -45,6 +72,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
       isLoading: true,
       error: null,
       streamingContent: '',
+      currentToolCalls: [],
+      currentToolResults: [],
     });
 
     try {
@@ -54,10 +83,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
         content: m.content,
       }));
 
-      const response = await fetch('/api/chat', {
+      const response = await fetch(`${API_BASE}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: apiMessages }),
+        credentials: 'include',
+        body: JSON.stringify({
+          messages: apiMessages,
+          yolo: yoloMode,
+        }),
       });
 
       if (!response.ok) {
@@ -69,7 +102,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
       const decoder = new TextDecoder();
       let buffer = '';
-
       let currentEvent = '';
       let finalized = false;
 
@@ -87,14 +119,39 @@ export const useChatStore = create<ChatState>((set, get) => ({
           } else if (line.startsWith('data: ')) {
             try {
               const data = JSON.parse(line.slice(6));
-              if (currentEvent === 'message' && data.content) {
-                get().appendStreamContent(data.content);
-              } else if (currentEvent === 'done') {
-                get().finalizeMessage();
-                finalized = true;
-              } else if (currentEvent === 'error') {
-                set({ error: data.message || 'Unknown error', isLoading: false });
-                finalized = true;
+
+              switch (currentEvent) {
+                case 'message':
+                  if (data.content) {
+                    get().appendStreamContent(data.content);
+                  }
+                  break;
+
+                case 'tool_use':
+                  get().addToolCall({
+                    id: data.id,
+                    name: data.name,
+                    input: data.input,
+                  });
+                  break;
+
+                case 'tool_result':
+                  get().addToolResult({
+                    tool_use_id: data.tool_use_id,
+                    content: data.content,
+                    is_error: data.is_error,
+                  });
+                  break;
+
+                case 'done':
+                  get().finalizeMessage();
+                  finalized = true;
+                  break;
+
+                case 'error':
+                  set({ error: data.message || 'Unknown error', isLoading: false });
+                  finalized = true;
+                  break;
               }
             } catch {
               // Skip invalid JSON
@@ -104,8 +161,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }
 
       // Ensure message is finalized when stream ends
-      if (!finalized && get().streamingContent) {
-        get().finalizeMessage();
+      if (!finalized) {
+        const { streamingContent, currentToolCalls, currentToolResults } = get();
+        if (streamingContent || currentToolCalls.length > 0 || currentToolResults.length > 0) {
+          get().finalizeMessage();
+        }
       }
     } catch (err) {
       const error = err as Error;
@@ -119,29 +179,57 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }));
   },
 
-  finalizeMessage: () => {
-    const { messages, streamingContent } = get();
+  addToolCall: (toolCall: ToolCall) => {
+    set((state) => ({
+      currentToolCalls: [...state.currentToolCalls, toolCall],
+    }));
+  },
 
-    if (streamingContent) {
+  addToolResult: (result: ToolResult) => {
+    set((state) => ({
+      currentToolResults: [...state.currentToolResults, result],
+    }));
+  },
+
+  finalizeMessage: () => {
+    const { messages, streamingContent, currentToolCalls, currentToolResults } = get();
+
+    // Only add a message if there's content or tool activity
+    if (streamingContent || currentToolCalls.length > 0) {
       const assistantMessage: Message = {
         id: generateId(),
         role: 'assistant',
         content: streamingContent,
+        toolCalls: currentToolCalls.length > 0 ? currentToolCalls : undefined,
+        toolResults: currentToolResults.length > 0 ? currentToolResults : undefined,
         createdAt: new Date(),
       };
 
       set({
         messages: [...messages, assistantMessage],
         streamingContent: '',
+        currentToolCalls: [],
+        currentToolResults: [],
         isLoading: false,
       });
     } else {
-      set({ isLoading: false });
+      set({
+        streamingContent: '',
+        currentToolCalls: [],
+        currentToolResults: [],
+        isLoading: false,
+      });
     }
   },
 
   clearMessages: () => {
-    set({ messages: [], error: null, streamingContent: '' });
+    set({
+      messages: [],
+      error: null,
+      streamingContent: '',
+      currentToolCalls: [],
+      currentToolResults: [],
+    });
   },
 
   setError: (error: string | null) => {

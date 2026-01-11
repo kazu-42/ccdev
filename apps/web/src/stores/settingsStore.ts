@@ -185,7 +185,11 @@ interface SettingsState {
   selectedTools: string[];
   customSetupScript: string;
 
+  // AI Behavior
+  yoloMode: boolean; // Auto-approve all tool calls without confirmation
+
   // Actions
+  setYoloMode: (enabled: boolean) => void;
   setTheme: (theme: Theme) => void;
   setFontSize: (size: FontSize) => void;
   setTerminalFontSize: (size: number) => void;
@@ -222,7 +226,11 @@ export const useSettingsStore = create<SettingsState>()(
       selectedTools: ['gh', 'rg', 'jq'], // Default selection
       customSetupScript: '',
 
+      // AI Behavior defaults
+      yoloMode: false,
+
       // Actions
+      setYoloMode: (yoloMode) => set({ yoloMode }),
       setTheme: (theme) => set({ theme }),
       setFontSize: (fontSize) => set({ fontSize }),
       setTerminalFontSize: (terminalFontSize) => set({ terminalFontSize }),
