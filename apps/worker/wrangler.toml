@@ -14,7 +14,7 @@ class_name = "TerminalSession"
 # DO migrations
 [[migrations]]
 tag = "v1"
-new_classes = ["TerminalSession"]
+new_sqlite_classes = ["TerminalSession"]
 
 # KV Namespaces - IDs need to be set after creation
 # Run: npx wrangler kv:namespace create SESSIONS
