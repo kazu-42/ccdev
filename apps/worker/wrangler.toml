@@ -1,0 +1,33 @@
+name = "claude-code-web-api"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+
+# Environment variables (non-secret)
+[vars]
+ENVIRONMENT = "development"
+
+# KV Namespaces - IDs need to be set after creation
+# Run: npx wrangler kv:namespace create SESSIONS
+# [[kv_namespaces]]
+# binding = "SESSIONS"
+# id = "your-kv-id"
+
+# D1 Database - ID needs to be set after creation
+# Run: npx wrangler d1 create claude-code-db
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "claude-code-db"
+# database_id = "your-d1-id"
+
+# Sandbox binding
+# [sandbox]
+# binding = "SANDBOX"
+
+# Production environment
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+# Local development settings
+[dev]
+port = 8787
+local_protocol = "http"
