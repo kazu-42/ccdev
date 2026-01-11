@@ -1,0 +1,7 @@
+# Copy this file to .dev.vars for local development
+# These variables will be available in your Worker
+
+# Anthropic API Key (required for chat functionality)
+ANTHROPIC_API_KEY=sk-ant-...
+
+# Add any other secrets here
