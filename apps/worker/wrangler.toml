@@ -6,20 +6,23 @@ compatibility_date = "2024-12-01"
 [vars]
 ENVIRONMENT = "development"
 
+# Durable Objects
+[[durable_objects.bindings]]
+name = "TERMINAL_SESSION"
+class_name = "TerminalSession"
+
+# DO migrations
+[[migrations]]
+tag = "v1"
+new_classes = ["TerminalSession"]
+
 # KV Namespaces - IDs need to be set after creation
 # Run: npx wrangler kv:namespace create SESSIONS
 # [[kv_namespaces]]
 # binding = "SESSIONS"
 # id = "your-kv-id"
 
-# D1 Database - ID needs to be set after creation
-# Run: npx wrangler d1 create claude-code-db
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "claude-code-db"
-# database_id = "your-d1-id"
-
-# Sandbox binding
+# Sandbox binding (Phase 3)
 # [sandbox]
 # binding = "SANDBOX"
 
@@ -29,5 +32,5 @@ vars = { ENVIRONMENT = "production" }
 
 # Local development settings
 [dev]
-port = 8787
+port = 8788
 local_protocol = "http"

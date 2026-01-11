@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icons/*.png'],
       manifest: {
-        name: 'Claude Code Web',
-        short_name: 'ClaudeCode',
-        description: 'AI-powered code execution in browser',
+        name: 'ccdev',
+        short_name: 'ccdev',
+        description: 'Web Terminal with Cloudflare Sandbox',
         theme_color: '#1a1a2e',
         background_color: '#ffffff',
         display: 'standalone',
@@ -50,7 +50,12 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:8787',
+        target: 'http://localhost:8788',
+        changeOrigin: true,
+      },
+      '/ws': {
+        target: 'ws://localhost:8788',
+        ws: true,
         changeOrigin: true,
       },
     },

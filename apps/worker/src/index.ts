@@ -5,6 +5,10 @@ import { corsMiddleware } from './middleware/cors';
 import { errorMiddleware } from './middleware/error';
 import { chatRouter } from './routes/chat';
 import { executeRouter } from './routes/execute';
+import { terminalRouter } from './routes/terminal';
+
+// Re-export Durable Object
+export { TerminalSession } from './durable-objects/TerminalSession';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -25,6 +29,9 @@ app.get('/health', (c) => {
 // API routes
 app.route('/api/chat', chatRouter);
 app.route('/api/execute', executeRouter);
+
+// WebSocket routes (no CORS needed)
+app.route('/ws/terminal', terminalRouter);
 
 // 404 handler
 app.notFound((c) => {

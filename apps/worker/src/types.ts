@@ -10,6 +10,9 @@ export interface Env {
   // D1 Database
   DB?: D1Database;
 
+  // Durable Objects
+  TERMINAL_SESSION: DurableObjectNamespace;
+
   // Sandbox (when available)
   // SANDBOX: unknown;
 }
