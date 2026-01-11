@@ -12,9 +12,7 @@ export interface Env {
 
   // Durable Objects
   TERMINAL_SESSION: DurableObjectNamespace;
-
-  // Sandbox (when available)
-  SANDBOX?: unknown;
+  Sandbox: DurableObjectNamespace;
 }
 
 // Message types

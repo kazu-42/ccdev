@@ -1,44 +1,42 @@
 name = "ccdev-api"
 main = "src/index.ts"
 compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
 
 # Environment variables (non-secret)
 [vars]
 ENVIRONMENT = "development"
+
+# Sandbox Container Configuration
+[[containers]]
+class_name = "Sandbox"
+image = "./Dockerfile"
+instance_type = "standard-1"
+max_instances = 5
 
 # Durable Objects
 [[durable_objects.bindings]]
 name = "TERMINAL_SESSION"
 class_name = "TerminalSession"
 
+[[durable_objects.bindings]]
+name = "Sandbox"
+class_name = "Sandbox"
+
 # DO migrations
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["TerminalSession"]
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["Sandbox"]
 
 # KV Namespaces - IDs need to be set after creation
 # Run: npx wrangler kv:namespace create SESSIONS
 # [[kv_namespaces]]
 # binding = "SESSIONS"
 # id = "your-kv-id"
-
-# Sandbox SDK (Phase 3)
-# Based on https://developers.cloudflare.com/sandbox/get-started/
-# Requires: Dockerfile in project root, Sandbox Durable Object class
-#
-# [[containers]]
-# class_name = "Sandbox"
-# image = "./Dockerfile"
-# instance_type = "lite"
-# max_instances = 1
-#
-# [[durable_objects.bindings]]
-# name = "Sandbox"
-# class_name = "Sandbox"
-#
-# [[migrations]]
-# tag = "v2"
-# new_sqlite_classes = ["Sandbox"]
 
 # Production environment
 [env.production]

@@ -7,8 +7,9 @@ import { chatRouter } from './routes/chat';
 import { executeRouter } from './routes/execute';
 import { terminalRouter } from './routes/terminal';
 
-// Re-export Durable Object
+// Re-export Durable Objects
 export { TerminalSession } from './durable-objects/TerminalSession';
+export { Sandbox } from '@cloudflare/sandbox';
 
 const app = new Hono<{ Bindings: Env }>();
 

@@ -1,4 +1,5 @@
 import type { Env } from '../types';
+import { getSandbox } from '@cloudflare/sandbox';
 
 interface ClientMessage {
   type: 'input' | 'resize';
@@ -239,7 +240,7 @@ export class TerminalSession {
 
       default:
         // Check if Sandbox SDK is available
-        if (this.env.SANDBOX) {
+        if (this.env.Sandbox) {
           await this.executeSandboxCommand(ws, command);
         } else {
           this.send(ws, {
@@ -341,20 +342,51 @@ will be available when Sandbox is enabled.\x1b[0m
     this.send(ws, { type: 'output', data: help.trim().replace(/\n/g, '\r\n') + '\r\n' });
   }
 
-  private async executeSandboxCommand(ws: WebSocket, _command: string): Promise<void> {
-    // This will be implemented when Sandbox SDK is available
-    // const sandbox = await getSandbox(this.env.SANDBOX);
-    // const result = await sandbox.exec('bash', ['-c', command], {
-    //   timeout: 30000,
-    //   cwd: this.cwd,
-    // });
-    // for await (const chunk of result.stdout) {
-    //   this.send(ws, { type: 'output', data: chunk });
-    // }
-    this.send(ws, {
-      type: 'output',
-      data: `\x1b[33mSandbox execution not yet implemented\x1b[0m\r\n`,
-    });
+  private async executeSandboxCommand(ws: WebSocket, command: string): Promise<void> {
+    try {
+      const sandbox = await getSandbox(this.env.Sandbox);
+
+      const result = await sandbox.exec('bash', ['-c', command], {
+        timeout: 30000,
+        cwd: this.cwd,
+        env: {
+          TERM: 'xterm-256color',
+          HOME: '/workspace',
+          USER: 'sandbox',
+          SHELL: '/bin/bash',
+        },
+        onOutput: (chunk: string) => {
+          // Stream output in real-time
+          this.send(ws, { type: 'output', data: chunk.replace(/\n/g, '\r\n') });
+        },
+      });
+
+      // Send exit code if non-zero
+      if (result.exitCode !== 0) {
+        this.send(ws, {
+          type: 'exit',
+          exitCode: result.exitCode
+        });
+      }
+
+      // Update cwd if command was cd
+      if (command.trim().startsWith('cd ')) {
+        // Try to get the new directory
+        const cdResult = await sandbox.exec('bash', ['-c', 'pwd'], {
+          timeout: 5000,
+          cwd: this.cwd,
+        });
+        if (cdResult.exitCode === 0 && cdResult.stdout) {
+          this.cwd = cdResult.stdout.trim();
+        }
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.send(ws, {
+        type: 'error',
+        data: `\x1b[31mSandbox error:\x1b[0m ${errorMessage}\r\n`,
+      });
+    }
   }
 
   private getPrompt(): string {
