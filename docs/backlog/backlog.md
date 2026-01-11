@@ -4,14 +4,16 @@
 
 未実装機能のバックログ一覧。各機能は独立したディレクトリに PRD、One-Pager、Design Doc を格納。
 
+**完了タスク:** [done/done.md](done/done.md) を参照
+
 ---
 
 ## バックログ一覧
 
 | # | 機能名 | 優先度 | 状態 | ディレクトリ |
 |---|--------|--------|------|--------------|
-| 1 | [チャット履歴](#1-チャット履歴) | P0 | 未着手 | `chat-history/` |
-| 2 | [AI Tool Use](#2-ai-tool-use) | P0 | 未着手 | `ai-tool-use/` |
+| 1 | [AI Tool Use](#1-ai-tool-use) | P0 | **着手中** | `ai-tool-use/` |
+| 2 | [チャット履歴](#2-チャット履歴) | P0 | 未着手 | `chat-history/` |
 | 3 | [Sandbox CLI Tools](#3-sandbox-cli-tools) | P1 | 設定UIのみ | `sandbox-cli-tools/` |
 | 4 | [Cloudflare Access認証](#4-cloudflare-access認証) | P1 | 未着手 | `cloudflare-access/` |
 | 5 | [仮想ファイルシステム](#5-仮想ファイルシステム) | P1 | 未着手 | `virtual-filesystem/` |
