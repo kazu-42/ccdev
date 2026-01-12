@@ -23,7 +23,8 @@ jobs:
         run: npm install
 
       - name: Build web app
-        run: npx turbo build --filter=@ccdev/web
+        working-directory: apps/web
+        run: npm run build
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
@@ -48,7 +49,8 @@ jobs:
         run: npm install
 
       - name: Build worker
-        run: npx turbo build --filter=@ccdev/worker
+        working-directory: apps/worker
+        run: npm run build
 
       - name: Deploy Worker
         uses: cloudflare/wrangler-action@v3
