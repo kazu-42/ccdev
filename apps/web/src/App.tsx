@@ -32,7 +32,8 @@ function LoadingScreen() {
 function MainContent() {
   const { mode, activeActivity, setMode } = useAppStore();
   const { user, logout } = useAuthStore();
-  const { selectedFile } = useFileStore();
+  // Use selector to ensure proper Zustand subscription
+  const selectedFile = useFileStore((state) => state.selectedFile);
 
   // Sync mode with activity selection
   const effectiveMode = activeActivity === 'chat' ? 'chat' : activeActivity === 'terminal' ? 'terminal' : activeActivity === 'files' && selectedFile ? 'editor' : mode;
