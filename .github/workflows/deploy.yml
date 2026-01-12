@@ -19,14 +19,11 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install all dependencies
-        run: |
-          npm install
-          cd apps/web && npm install
+      - name: Install dependencies with workspaces
+        run: npm install --workspaces --include-workspace-root
 
       - name: Build web app
-        working-directory: apps/web
-        run: npm run build
+        run: npm run build --workspace=apps/web
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
@@ -47,10 +44,8 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install all dependencies
-        run: |
-          npm install
-          cd apps/worker && npm install
+      - name: Install dependencies
+        run: npm install --workspaces --include-workspace-root
 
       - name: Deploy Worker
         uses: cloudflare/wrangler-action@v3
@@ -58,5 +53,5 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: apps/worker
-          wranglerVersion: '3'
+          wranglerVersion: '4'
           command: deploy
