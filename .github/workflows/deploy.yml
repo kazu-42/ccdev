@@ -35,6 +35,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '4'
+          packageManager: npm
           command: pages deploy apps/web/dist --project-name=ccdev --commit-dirty=true
 
   deploy-worker:
