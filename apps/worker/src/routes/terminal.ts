@@ -25,9 +25,11 @@ terminalRouter.get('/:sessionId', async (c) => {
   const url = new URL(c.req.url);
   url.pathname = '/ws';
 
-  return stub.fetch(new Request(url.toString(), {
-    headers: c.req.raw.headers,
-  }));
+  return stub.fetch(
+    new Request(url.toString(), {
+      headers: c.req.raw.headers,
+    }),
+  );
 });
 
 // Get session info (for future use)

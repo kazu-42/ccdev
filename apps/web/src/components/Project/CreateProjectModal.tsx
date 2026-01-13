@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useProjectStore } from '@/stores/projectStore';
 
 interface CreateProjectModalProps {
@@ -6,7 +6,10 @@ interface CreateProjectModalProps {
   onClose: () => void;
 }
 
-export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps) {
+export function CreateProjectModal({
+  isOpen,
+  onClose,
+}: CreateProjectModalProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -66,13 +69,25 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
       <div className="relative w-full max-w-md bg-dark-surface border border-dark-border rounded-xl shadow-xl">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-dark-border">
-          <h2 className="text-lg font-semibold text-white">Create New Project</h2>
+          <h2 className="text-lg font-semibold text-white">
+            Create New Project
+          </h2>
           <button
             onClick={onClose}
             className="p-1 text-gray-400 hover:text-white transition-colors"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="w-5 h-5"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -82,7 +97,10 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
           <div className="px-6 py-4 space-y-4">
             {/* Project name */}
             <div>
-              <label htmlFor="project-name" className="block text-sm font-medium text-gray-300 mb-2">
+              <label
+                htmlFor="project-name"
+                className="block text-sm font-medium text-gray-300 mb-2"
+              >
                 Project Name <span className="text-red-400">*</span>
               </label>
               <input
@@ -99,7 +117,10 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
 
             {/* Description */}
             <div>
-              <label htmlFor="project-description" className="block text-sm font-medium text-gray-300 mb-2">
+              <label
+                htmlFor="project-description"
+                className="block text-sm font-medium text-gray-300 mb-2"
+              >
                 Description <span className="text-gray-500">(optional)</span>
               </label>
               <textarea

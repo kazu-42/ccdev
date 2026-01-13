@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 export interface ExecutionResult {
   stdout: string;
@@ -104,8 +104,10 @@ async function executeJavaScript(code: string): Promise<ExecutionResult> {
     // Override console.log to capture output
     const customConsole = {
       log: (...args: unknown[]) => logs.push(args.map(formatValue).join(' ')),
-      error: (...args: unknown[]) => logs.push('[error] ' + args.map(formatValue).join(' ')),
-      warn: (...args: unknown[]) => logs.push('[warn] ' + args.map(formatValue).join(' ')),
+      error: (...args: unknown[]) =>
+        logs.push(`[error] ${args.map(formatValue).join(' ')}`),
+      warn: (...args: unknown[]) =>
+        logs.push(`[warn] ${args.map(formatValue).join(' ')}`),
       info: (...args: unknown[]) => logs.push(args.map(formatValue).join(' ')),
     };
 
@@ -158,7 +160,7 @@ function formatValue(val: unknown): string {
 
 async function executeServerSide(
   code: string,
-  language: 'javascript' | 'typescript'
+  language: 'javascript' | 'typescript',
 ): Promise<ExecutionResult> {
   // For now, execute JavaScript client-side for development
   // Server-side execution requires Cloudflare Sandbox SDK
@@ -227,7 +229,7 @@ export function useCodeExecution(): UseCodeExecutionReturn {
         setIsExecuting(false);
       }
     },
-    []
+    [],
   );
 
   const clearResult = useCallback(() => {

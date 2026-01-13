@@ -6,7 +6,11 @@ interface OutputPanelProps {
   onClose?: () => void;
 }
 
-export function OutputPanel({ result, isExecuting, onClose }: OutputPanelProps) {
+export function OutputPanel({
+  result,
+  isExecuting,
+  onClose,
+}: OutputPanelProps) {
   if (!result && !isExecuting) return null;
 
   return (
@@ -32,14 +36,21 @@ export function OutputPanel({ result, isExecuting, onClose }: OutputPanelProps) 
         </div>
         <div className="flex items-center gap-2">
           {result && (
-            <span className="text-xs text-gray-500">{result.executionTime}ms</span>
+            <span className="text-xs text-gray-500">
+              {result.executionTime}ms
+            </span>
           )}
           {onClose && (
             <button
               onClick={onClose}
               className="text-gray-500 hover:text-white transition-colors"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"

@@ -178,7 +178,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
                   break;
 
                 case 'error':
-                  set({ error: data.message || 'Unknown error', isLoading: false });
+                  set({
+                    error: data.message || 'Unknown error',
+                    isLoading: false,
+                  });
                   finalized = true;
                   break;
               }
@@ -191,8 +194,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
       // Ensure message is finalized when stream ends
       if (!finalized) {
-        const { streamingContent, currentToolCalls, currentToolResults } = get();
-        if (streamingContent || currentToolCalls.length > 0 || currentToolResults.length > 0) {
+        const { streamingContent, currentToolCalls, currentToolResults } =
+          get();
+        if (
+          streamingContent ||
+          currentToolCalls.length > 0 ||
+          currentToolResults.length > 0
+        ) {
           get().finalizeMessage();
         }
       }
@@ -221,7 +229,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   finalizeMessage: () => {
-    const { messages, streamingContent, currentToolCalls, currentToolResults } = get();
+    const { messages, streamingContent, currentToolCalls, currentToolResults } =
+      get();
 
     // Only add a message if there's content or tool activity
     if (streamingContent || currentToolCalls.length > 0) {
@@ -230,7 +239,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
         role: 'assistant',
         content: streamingContent,
         toolCalls: currentToolCalls.length > 0 ? currentToolCalls : undefined,
-        toolResults: currentToolResults.length > 0 ? currentToolResults : undefined,
+        toolResults:
+          currentToolResults.length > 0 ? currentToolResults : undefined,
         createdAt: new Date(),
       };
 
@@ -316,18 +326,20 @@ export const useChatStore = create<ChatState>((set, get) => ({
       if (session.chat_history) {
         try {
           const parsed = JSON.parse(session.chat_history);
-          messages = parsed.map((m: {
-            id?: string;
-            role: 'user' | 'assistant';
-            content: string;
-            toolCalls?: ToolCall[];
-            toolResults?: ToolResult[];
-            createdAt?: string;
-          }) => ({
-            ...m,
-            id: m.id || generateId(),
-            createdAt: m.createdAt ? new Date(m.createdAt) : new Date(),
-          }));
+          messages = parsed.map(
+            (m: {
+              id?: string;
+              role: 'user' | 'assistant';
+              content: string;
+              toolCalls?: ToolCall[];
+              toolResults?: ToolResult[];
+              createdAt?: string;
+            }) => ({
+              ...m,
+              id: m.id || generateId(),
+              createdAt: m.createdAt ? new Date(m.createdAt) : new Date(),
+            }),
+          );
         } catch {
           console.error('Failed to parse chat history');
         }
@@ -360,7 +372,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
           toolCalls: m.toolCalls,
           toolResults: m.toolResults,
           createdAt: m.createdAt.toISOString(),
-        }))
+        })),
       );
 
       await fetch(`${API_BASE}/api/sessions/${currentSessionId}`, {
@@ -376,10 +388,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   createNewSession: async (projectId: string) => {
     try {
-      const response = await fetch(`${API_BASE}/api/projects/${projectId}/sessions`, {
-        method: 'POST',
-        credentials: 'include',
-      });
+      const response = await fetch(
+        `${API_BASE}/api/projects/${projectId}/sessions`,
+        {
+          method: 'POST',
+          credentials: 'include',
+        },
+      );
 
       if (!response.ok) {
         throw new Error('Failed to create session');

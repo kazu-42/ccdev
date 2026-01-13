@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 import {
   api,
-  type GitHubStatus,
-  type GitHubRepo,
-  type ProjectRepository,
-  type GitStatus,
   type GitCommit,
+  type GitHubRepo,
+  type GitHubStatus,
+  type GitStatus,
+  type ProjectRepository,
 } from '@/lib/api';
 
 interface GitState {
@@ -37,10 +37,7 @@ interface GitState {
 
   // Actions - Repository management
   fetchRepository: (projectId: string) => Promise<void>;
-  cloneRepository: (
-    projectId: string,
-    repo: GitHubRepo
-  ) => Promise<void>;
+  cloneRepository: (projectId: string, repo: GitHubRepo) => Promise<void>;
   disconnectRepository: (projectId: string) => Promise<void>;
 
   // Actions - Git operations
@@ -50,13 +47,13 @@ interface GitState {
   commit: (
     projectId: string,
     message: string,
-    files?: string[]
+    files?: string[],
   ) => Promise<{ success: boolean; message: string }>;
   fetchBranches: (projectId: string) => Promise<void>;
   checkout: (
     projectId: string,
     branch: string,
-    create?: boolean
+    create?: boolean,
   ) => Promise<{ success: boolean; message: string }>;
   fetchLog: (projectId: string, limit?: number) => Promise<void>;
 
@@ -91,7 +88,10 @@ export const useGitStore = create<GitState>((set, get) => ({
       set({
         githubStatus: { connected: false },
         isCheckingConnection: false,
-        error: error instanceof Error ? error.message : 'Failed to check GitHub connection',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to check GitHub connection',
       });
     }
   },
@@ -113,7 +113,10 @@ export const useGitStore = create<GitState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to disconnect GitHub',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to disconnect GitHub',
       });
     }
   },
@@ -123,7 +126,8 @@ export const useGitStore = create<GitState>((set, get) => ({
     try {
       const result = await api.getGitHubRepos(page, 30);
       set({
-        githubRepos: page === 1 ? result.repos : [...get().githubRepos, ...result.repos],
+        githubRepos:
+          page === 1 ? result.repos : [...get().githubRepos, ...result.repos],
         reposPage: page,
         hasMoreRepos: result.hasMore,
         isLoadingRepos: false,
@@ -131,7 +135,10 @@ export const useGitStore = create<GitState>((set, get) => ({
     } catch (error) {
       set({
         isLoadingRepos: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch repositories',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to fetch repositories',
       });
     }
   },
@@ -158,7 +165,8 @@ export const useGitStore = create<GitState>((set, get) => ({
       set({
         repository: null,
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch repository',
+        error:
+          error instanceof Error ? error.message : 'Failed to fetch repository',
       });
     }
   },
@@ -178,7 +186,8 @@ export const useGitStore = create<GitState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to clone repository',
+        error:
+          error instanceof Error ? error.message : 'Failed to clone repository',
       });
       throw error;
     }
@@ -199,7 +208,10 @@ export const useGitStore = create<GitState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to disconnect repository',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to disconnect repository',
       });
     }
   },
@@ -209,7 +221,7 @@ export const useGitStore = create<GitState>((set, get) => ({
     try {
       const { status } = await api.getGitStatus(projectId);
       set({ gitStatus: status, currentBranch: status.branch });
-    } catch (error) {
+    } catch (_error) {
       // Status might fail if not a git repo
       set({ gitStatus: null });
     }
@@ -299,7 +311,7 @@ export const useGitStore = create<GitState>((set, get) => ({
     try {
       const { branches, current } = await api.getGitBranches(projectId, true);
       set({ branches, currentBranch: current });
-    } catch (error) {
+    } catch (_error) {
       set({ branches: [], currentBranch: null });
     }
   },
@@ -336,7 +348,7 @@ export const useGitStore = create<GitState>((set, get) => ({
     try {
       const { commits } = await api.getGitLog(projectId, limit);
       set({ commits });
-    } catch (error) {
+    } catch (_error) {
       set({ commits: [] });
     }
   },

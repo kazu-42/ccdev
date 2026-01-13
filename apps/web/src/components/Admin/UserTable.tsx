@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useAdminStore } from '@/stores/adminStore';
 import type { User } from '@/lib/api';
+import { useAdminStore } from '@/stores/adminStore';
 
 export function UserTable() {
   const { users, usersLoading, updateUserRole, deleteUser } = useAdminStore();
@@ -33,9 +33,7 @@ export function UserTable() {
 
   if (users.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-400">
-        No users found
-      </div>
+      <div className="text-center py-12 text-gray-400">No users found</div>
     );
   }
 
@@ -44,10 +42,18 @@ export function UserTable() {
       <table className="w-full">
         <thead>
           <tr className="text-left border-b border-dark-border">
-            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">User</th>
-            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Role</th>
-            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Created</th>
-            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">
+              User
+            </th>
+            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">
+              Role
+            </th>
+            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">
+              Created
+            </th>
+            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-dark-border">
@@ -59,7 +65,9 @@ export function UserTable() {
                     {user.email[0].toUpperCase()}
                   </div>
                   <div>
-                    <div className="text-sm text-white">{user.name || 'No name'}</div>
+                    <div className="text-sm text-white">
+                      {user.name || 'No name'}
+                    </div>
                     <div className="text-xs text-gray-500">{user.email}</div>
                   </div>
                 </div>
@@ -67,7 +75,9 @@ export function UserTable() {
               <td className="px-4 py-3">
                 <select
                   value={user.role}
-                  onChange={(e) => handleRoleChange(user, e.target.value as 'admin' | 'user')}
+                  onChange={(e) =>
+                    handleRoleChange(user, e.target.value as 'admin' | 'user')
+                  }
                   className={`text-xs px-2 py-1 rounded border-0 cursor-pointer ${
                     user.role === 'admin'
                       ? 'bg-red-500/20 text-red-400'

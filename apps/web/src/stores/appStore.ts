@@ -2,7 +2,13 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export type AppMode = 'chat' | 'terminal' | 'editor';
-export type ActivityType = 'files' | 'chat' | 'terminal' | 'settings' | 'git' | null;
+export type ActivityType =
+  | 'files'
+  | 'chat'
+  | 'terminal'
+  | 'settings'
+  | 'git'
+  | null;
 
 interface AppState {
   // Main content mode
@@ -44,6 +50,6 @@ export const useAppStore = create<AppState>()(
         // Handle migration from older versions
         return persistedState as AppState;
       },
-    }
-  )
+    },
+  ),
 );

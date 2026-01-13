@@ -1,4 +1,4 @@
-import { useAppStore, type AppMode } from '@/stores/appStore';
+import { type AppMode, useAppStore } from '@/stores/appStore';
 
 const modes: { id: AppMode; label: string; icon: string }[] = [
   { id: 'terminal', label: 'Terminal', icon: '>' },

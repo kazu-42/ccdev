@@ -104,7 +104,7 @@ export interface GitOperationResult {
 class ApiClient {
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
   ): Promise<T> {
     const url = `${API_BASE}${endpoint}`;
     const response = await fetch(url, {
@@ -148,7 +148,10 @@ class ApiClient {
     return this.request('/projects');
   }
 
-  async createProject(name: string, description?: string): Promise<{ project: Project }> {
+  async createProject(
+    name: string,
+    description?: string,
+  ): Promise<{ project: Project }> {
     return this.request('/projects', {
       method: 'POST',
       body: JSON.stringify({ name, description }),
@@ -159,7 +162,10 @@ class ApiClient {
     return this.request(`/projects/${id}`);
   }
 
-  async updateProject(id: string, data: { name?: string; description?: string }): Promise<{ project: Project }> {
+  async updateProject(
+    id: string,
+    data: { name?: string; description?: string },
+  ): Promise<{ project: Project }> {
     return this.request(`/projects/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
@@ -171,7 +177,9 @@ class ApiClient {
   }
 
   // Session endpoints
-  async getProjectSessions(projectId: string): Promise<{ sessions: Session[] }> {
+  async getProjectSessions(
+    projectId: string,
+  ): Promise<{ sessions: Session[] }> {
     return this.request(`/projects/${projectId}/sessions`);
   }
 
@@ -179,7 +187,9 @@ class ApiClient {
     return this.request(`/projects/${projectId}/sessions`, { method: 'POST' });
   }
 
-  async getLatestSession(projectId: string): Promise<{ session: Session | null }> {
+  async getLatestSession(
+    projectId: string,
+  ): Promise<{ session: Session | null }> {
     return this.request(`/projects/${projectId}/sessions/latest`);
   }
 
@@ -199,15 +209,23 @@ class ApiClient {
     return this.request('/admin/stats');
   }
 
-  async getAdminUsers(limit = 100, offset = 0): Promise<{ users: User[]; limit: number; offset: number }> {
+  async getAdminUsers(
+    limit = 100,
+    offset = 0,
+  ): Promise<{ users: User[]; limit: number; offset: number }> {
     return this.request(`/admin/users?limit=${limit}&offset=${offset}`);
   }
 
-  async getAdminUser(id: string): Promise<{ user: User; projects: Project[]; permissions: Permission[] }> {
+  async getAdminUser(
+    id: string,
+  ): Promise<{ user: User; projects: Project[]; permissions: Permission[] }> {
     return this.request(`/admin/users/${id}`);
   }
 
-  async updateAdminUser(id: string, data: { role?: 'admin' | 'user'; name?: string }): Promise<{ user: User }> {
+  async updateAdminUser(
+    id: string,
+    data: { role?: 'admin' | 'user'; name?: string },
+  ): Promise<{ user: User }> {
     return this.request(`/admin/users/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
@@ -218,7 +236,10 @@ class ApiClient {
     return this.request(`/admin/users/${id}`, { method: 'DELETE' });
   }
 
-  async getAdminProjects(limit = 100, offset = 0): Promise<{ projects: Project[]; limit: number; offset: number }> {
+  async getAdminProjects(
+    limit = 100,
+    offset = 0,
+  ): Promise<{ projects: Project[]; limit: number; offset: number }> {
     return this.request(`/admin/projects?limit=${limit}&offset=${offset}`);
   }
 
@@ -226,7 +247,10 @@ class ApiClient {
     return this.request(`/admin/projects/${id}`, { method: 'DELETE' });
   }
 
-  async getAdminPermissions(limit = 100, offset = 0): Promise<{ permissions: Permission[]; limit: number; offset: number }> {
+  async getAdminPermissions(
+    limit = 100,
+    offset = 0,
+  ): Promise<{ permissions: Permission[]; limit: number; offset: number }> {
     return this.request(`/admin/permissions?limit=${limit}&offset=${offset}`);
   }
 
@@ -259,7 +283,10 @@ class ApiClient {
     return this.request('/github/disconnect', { method: 'DELETE' });
   }
 
-  async getGitHubRepos(page = 1, perPage = 30): Promise<{
+  async getGitHubRepos(
+    page = 1,
+    perPage = 30,
+  ): Promise<{
     repos: GitHubRepo[];
     page: number;
     perPage: number;
@@ -269,13 +296,20 @@ class ApiClient {
   }
 
   // Project repository endpoints
-  async getProjectRepository(projectId: string): Promise<{ repository: ProjectRepository | null }> {
+  async getProjectRepository(
+    projectId: string,
+  ): Promise<{ repository: ProjectRepository | null }> {
     return this.request(`/projects/${projectId}/repository`);
   }
 
   async cloneRepository(
     projectId: string,
-    data: { repoFullName: string; repoUrl: string; defaultBranch?: string; clonePath?: string }
+    data: {
+      repoFullName: string;
+      repoUrl: string;
+      defaultBranch?: string;
+      clonePath?: string;
+    },
   ): Promise<{ success: boolean; repository: ProjectRepository }> {
     return this.request(`/projects/${projectId}/repository`, {
       method: 'POST',
@@ -284,7 +318,9 @@ class ApiClient {
   }
 
   async disconnectRepository(projectId: string): Promise<{ success: boolean }> {
-    return this.request(`/projects/${projectId}/repository`, { method: 'DELETE' });
+    return this.request(`/projects/${projectId}/repository`, {
+      method: 'DELETE',
+    });
   }
 
   // Git operation endpoints
@@ -296,36 +332,56 @@ class ApiClient {
     return this.request(`/projects/${projectId}/git/pull`, { method: 'POST' });
   }
 
-  async gitPush(projectId: string, options?: { force?: boolean; setUpstream?: string }): Promise<GitOperationResult> {
+  async gitPush(
+    projectId: string,
+    options?: { force?: boolean; setUpstream?: string },
+  ): Promise<GitOperationResult> {
     return this.request(`/projects/${projectId}/git/push`, {
       method: 'POST',
       body: JSON.stringify(options || {}),
     });
   }
 
-  async gitCommit(projectId: string, message: string, files?: string[]): Promise<GitOperationResult> {
+  async gitCommit(
+    projectId: string,
+    message: string,
+    files?: string[],
+  ): Promise<GitOperationResult> {
     return this.request(`/projects/${projectId}/git/commit`, {
       method: 'POST',
       body: JSON.stringify({ message, files }),
     });
   }
 
-  async getGitBranches(projectId: string, all = false): Promise<{ branches: string[]; current: string }> {
+  async getGitBranches(
+    projectId: string,
+    all = false,
+  ): Promise<{ branches: string[]; current: string }> {
     return this.request(`/projects/${projectId}/git/branches?all=${all}`);
   }
 
-  async gitCheckout(projectId: string, branch: string, create = false): Promise<GitOperationResult> {
+  async gitCheckout(
+    projectId: string,
+    branch: string,
+    create = false,
+  ): Promise<GitOperationResult> {
     return this.request(`/projects/${projectId}/git/checkout`, {
       method: 'POST',
       body: JSON.stringify({ branch, create }),
     });
   }
 
-  async getGitLog(projectId: string, limit = 20): Promise<{ commits: GitCommit[] }> {
+  async getGitLog(
+    projectId: string,
+    limit = 20,
+  ): Promise<{ commits: GitCommit[] }> {
     return this.request(`/projects/${projectId}/git/log?limit=${limit}`);
   }
 
-  async getGitDiff(projectId: string, options?: { staged?: boolean; file?: string }): Promise<{ diff: string }> {
+  async getGitDiff(
+    projectId: string,
+    options?: { staged?: boolean; file?: string },
+  ): Promise<{ diff: string }> {
     const params = new URLSearchParams();
     if (options?.staged) params.set('staged', 'true');
     if (options?.file) params.set('file', options.file);

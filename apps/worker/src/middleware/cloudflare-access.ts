@@ -1,5 +1,5 @@
 // Cloudflare Access JWT Validation Middleware
-import { jwtVerify, createRemoteJWKSet } from 'jose';
+import { createRemoteJWKSet, jwtVerify } from 'jose';
 import type { Env } from '../types';
 
 /**
@@ -31,7 +31,7 @@ export interface AccessPayload {
  */
 export async function validateAccessToken(
   request: Request,
-  env: Env
+  env: Env,
 ): Promise<AccessPayload | null> {
   // Get JWT from Cloudflare Access header
   const token = request.headers.get('Cf-Access-Jwt-Assertion');
@@ -49,7 +49,7 @@ export async function validateAccessToken(
     // Create JWKS endpoint URL
     const certsUrl = new URL(
       '/cdn-cgi/access/certs',
-      env.CF_ACCESS_TEAM_DOMAIN
+      env.CF_ACCESS_TEAM_DOMAIN,
     );
 
     // Create remote JWKS validator

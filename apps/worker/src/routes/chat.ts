@@ -1,8 +1,8 @@
+import Anthropic from '@anthropic-ai/sdk';
 import { Hono } from 'hono';
 import { z } from 'zod';
-import type { Env, SSEEvent } from '../types';
-import Anthropic from '@anthropic-ai/sdk';
 import { SandboxService } from '../services/sandbox';
+import type { Env, SSEEvent } from '../types';
 
 const chatRouter = new Hono<{ Bindings: Env }>();
 
@@ -72,7 +72,8 @@ const TOOLS: Anthropic.Tool[] = [
       properties: {
         path: {
           type: 'string',
-          description: 'The directory path to list (default: current directory)',
+          description:
+            'The directory path to list (default: current directory)',
         },
       },
       required: [],
@@ -89,7 +90,7 @@ const chatRequestSchema = z.object({
         z.string().min(1),
         z.array(z.any()), // Allow content blocks
       ]),
-    })
+    }),
   ),
   model: z.string().optional(),
   yolo: z.boolean().optional(), // Auto-approve tool calls
@@ -101,7 +102,7 @@ const chatRequestSchema = z.object({
 async function executeTool(
   name: string,
   input: Record<string, unknown>,
-  sandbox: SandboxService
+  sandbox: SandboxService,
 ): Promise<{ result: string; isError: boolean }> {
   try {
     switch (name) {
@@ -110,7 +111,8 @@ async function executeTool(
         const code = input.code as string;
 
         // Map language to sandbox-compatible format
-        let lang: 'javascript' | 'typescript' | 'python' | 'bash' = 'javascript';
+        let lang: 'javascript' | 'typescript' | 'python' | 'bash' =
+          'javascript';
         if (language === 'typescript') lang = 'typescript';
         else if (language === 'python') lang = 'python';
         else if (language === 'bash') lang = 'bash';
@@ -134,7 +136,10 @@ async function executeTool(
           const content = await sandbox.readFile(path);
           return { result: content, isError: false };
         } catch (err) {
-          return { result: `Error reading file: ${(err as Error).message}`, isError: true };
+          return {
+            result: `Error reading file: ${(err as Error).message}`,
+            isError: true,
+          };
         }
       }
 
@@ -150,7 +155,10 @@ async function executeTool(
           await sandbox.writeFile(path, content);
           return { result: `Successfully wrote to ${path}`, isError: false };
         } catch (err) {
-          return { result: `Error writing file: ${(err as Error).message}`, isError: true };
+          return {
+            result: `Error writing file: ${(err as Error).message}`,
+            isError: true,
+          };
         }
       }
 
@@ -159,11 +167,17 @@ async function executeTool(
         try {
           const files = await sandbox.listFiles(path);
           const formatted = files
-            .map((f) => `${f.type === 'directory' ? 'd' : '-'} ${f.name}${f.size ? ` (${f.size} bytes)` : ''}`)
+            .map(
+              (f) =>
+                `${f.type === 'directory' ? 'd' : '-'} ${f.name}${f.size ? ` (${f.size} bytes)` : ''}`,
+            )
             .join('\n');
           return { result: formatted || '(empty directory)', isError: false };
         } catch (err) {
-          return { result: `Error listing files: ${(err as Error).message}`, isError: true };
+          return {
+            result: `Error listing files: ${(err as Error).message}`,
+            isError: true,
+          };
         }
       }
 
@@ -198,7 +212,7 @@ chatRouter.post('/', async (c) => {
         message: 'Invalid request format',
         details: result.error.flatten(),
       },
-      400
+      400,
     );
   }
 
@@ -211,7 +225,7 @@ chatRouter.post('/', async (c) => {
         error: 'configuration_error',
         message: 'ANTHROPIC_API_KEY is not configured',
       },
-      500
+      500,
     );
   }
 
@@ -267,8 +281,8 @@ Current working directory: /home/sandbox`,
                   formatSSE({
                     event: 'message',
                     data: { content: block.text },
-                  })
-                )
+                  }),
+                ),
               );
             } else if (block.type === 'tool_use') {
               toolUses.push({
@@ -288,15 +302,17 @@ Current working directory: /home/sandbox`,
                       name: block.name,
                       input: block.input,
                     },
-                  })
-                )
+                  }),
+                ),
               );
             }
           }
 
           // If no tool calls or stop_reason is end_turn, we're done
           if (toolUses.length === 0 || response.stop_reason === 'end_turn') {
-            controller.enqueue(encoder.encode(formatSSE({ event: 'done', data: {} })));
+            controller.enqueue(
+              encoder.encode(formatSSE({ event: 'done', data: {} })),
+            );
             break;
           }
 
@@ -313,7 +329,7 @@ Current working directory: /home/sandbox`,
             const { result: toolResult, isError } = await executeTool(
               toolUse.name,
               toolUse.input,
-              sandbox
+              sandbox,
             );
 
             toolResults.push({
@@ -333,8 +349,8 @@ Current working directory: /home/sandbox`,
                     content: toolResult,
                     is_error: isError,
                   },
-                })
-              )
+                }),
+              ),
             );
           }
 
@@ -364,12 +380,15 @@ Current working directory: /home/sandbox`,
               formatSSE({
                 event: 'message',
                 data: {
-                  content: '\n\n[Max tool iterations reached. Please continue if needed.]',
+                  content:
+                    '\n\n[Max tool iterations reached. Please continue if needed.]',
                 },
-              })
-            )
+              }),
+            ),
           );
-          controller.enqueue(encoder.encode(formatSSE({ event: 'done', data: {} })));
+          controller.enqueue(
+            encoder.encode(formatSSE({ event: 'done', data: {} })),
+          );
         }
       } catch (error) {
         const err = error as Error;
@@ -378,8 +397,8 @@ Current working directory: /home/sandbox`,
             formatSSE({
               event: 'error',
               data: { message: err.message },
-            })
-          )
+            }),
+          ),
         );
       } finally {
         controller.close();

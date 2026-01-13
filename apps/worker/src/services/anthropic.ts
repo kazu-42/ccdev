@@ -8,7 +8,8 @@ const MAX_TOKENS = 4096;
 const TOOLS: Anthropic.Tool[] = [
   {
     name: 'execute_code',
-    description: 'Execute code in a sandboxed environment. Use this to run and test code.',
+    description:
+      'Execute code in a sandboxed environment. Use this to run and test code.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -36,7 +37,7 @@ export class AnthropicService {
 
   async *createMessageStream(
     messages: Message[],
-    model: string = DEFAULT_MODEL
+    model: string = DEFAULT_MODEL,
   ): AsyncGenerator<SSEEvent> {
     // Convert messages to Anthropic format
     const anthropicMessages: Anthropic.MessageParam[] = messages.map((msg) => ({
@@ -83,7 +84,7 @@ export class AnthropicService {
 
   async createMessage(
     messages: Message[],
-    model: string = DEFAULT_MODEL
+    model: string = DEFAULT_MODEL,
   ): Promise<Anthropic.Message> {
     const anthropicMessages: Anthropic.MessageParam[] = messages.map((msg) => ({
       role: msg.role,

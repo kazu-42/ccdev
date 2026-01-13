@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 
-export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
+export type ConnectionStatus =
+  | 'disconnected'
+  | 'connecting'
+  | 'connected'
+  | 'error';
 
 interface TerminalState {
   sessionId: string | null;
@@ -23,7 +27,8 @@ export const useTerminalStore = create<TerminalState>((set) => ({
 
   setSessionId: (id) => set({ sessionId: id }),
   setConnectionStatus: (status) => set({ connectionStatus: status }),
-  setError: (error) => set({ error, connectionStatus: error ? 'error' : 'disconnected' }),
+  setError: (error) =>
+    set({ error, connectionStatus: error ? 'error' : 'disconnected' }),
 
   reset: () =>
     set({

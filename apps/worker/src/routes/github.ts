@@ -1,10 +1,10 @@
 // GitHub OAuth and API Routes for ccdev
 import { Hono } from 'hono';
-import type { Env, GitHubRepo } from '../types';
-import { authMiddleware } from '../middleware/auth';
-import { encrypt, decrypt } from '../services/encryption';
 import { generateId } from '../db/queries';
 import type { User } from '../db/types';
+import { authMiddleware } from '../middleware/auth';
+import { decrypt, encrypt } from '../services/encryption';
+import type { Env, GitHubRepo } from '../types';
 
 const github = new Hono<{ Bindings: Env }>();
 
@@ -37,12 +37,12 @@ github.get('/auth', async (c) => {
   // Using cookie since KV might not be available
   c.header(
     'Set-Cookie',
-    `github_oauth_state=${state}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`
+    `github_oauth_state=${state}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`,
   );
   c.header(
     'Set-Cookie',
     `github_oauth_user=${user.id}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`,
-    { append: true }
+    { append: true },
   );
 
   const authUrl = new URL('https://github.com/login/oauth/authorize');
@@ -61,7 +61,7 @@ github.get('/auth/callback', async (c) => {
   const error = c.req.query('error');
 
   if (error) {
-    return c.redirect('/?github=error&reason=' + encodeURIComponent(error));
+    return c.redirect(`/?github=error&reason=${encodeURIComponent(error)}`);
   }
 
   if (!code || !state) {
@@ -84,25 +84,31 @@ github.get('/auth/callback', async (c) => {
 
   try {
     // Exchange code for access token
-    const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
+    const tokenResponse = await fetch(
+      'https://github.com/login/oauth/access_token',
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          client_id: c.env.GITHUB_CLIENT_ID,
+          client_secret: c.env.GITHUB_CLIENT_SECRET,
+          code,
+        }),
       },
-      body: JSON.stringify({
-        client_id: c.env.GITHUB_CLIENT_ID,
-        client_secret: c.env.GITHUB_CLIENT_SECRET,
-        code,
-      }),
-    });
+    );
 
     if (!tokenResponse.ok) {
-      console.error('GitHub token exchange failed:', await tokenResponse.text());
+      console.error(
+        'GitHub token exchange failed:',
+        await tokenResponse.text(),
+      );
       return c.redirect('/?github=error&reason=token_exchange_failed');
     }
 
-    const tokenData = await tokenResponse.json() as {
+    const tokenData = (await tokenResponse.json()) as {
       access_token: string;
       scope: string;
       token_type: string;
@@ -110,15 +116,17 @@ github.get('/auth/callback', async (c) => {
     };
 
     if (tokenData.error) {
-      return c.redirect('/?github=error&reason=' + encodeURIComponent(tokenData.error));
+      return c.redirect(
+        `/?github=error&reason=${encodeURIComponent(tokenData.error)}`,
+      );
     }
 
     // Get GitHub user info
     const userResponse = await fetch('https://api.github.com/user', {
       headers: {
-        'Authorization': `Bearer ${tokenData.access_token}`,
+        Authorization: `Bearer ${tokenData.access_token}`,
         'User-Agent': 'ccdev',
-        'Accept': 'application/vnd.github.v3+json',
+        Accept: 'application/vnd.github.v3+json',
       },
     });
 
@@ -126,7 +134,7 @@ github.get('/auth/callback', async (c) => {
       return c.redirect('/?github=error&reason=user_fetch_failed');
     }
 
-    const githubUser = await userResponse.json() as {
+    const githubUser = (await userResponse.json()) as {
       id: number;
       login: string;
     };
@@ -137,7 +145,10 @@ github.get('/auth/callback', async (c) => {
       return c.redirect('/?github=error&reason=encryption_not_configured');
     }
 
-    const { encrypted, iv } = await encrypt(tokenData.access_token, encryptionKey);
+    const { encrypted, iv } = await encrypt(
+      tokenData.access_token,
+      encryptionKey,
+    );
 
     // Save or update GitHub connection
     const connectionId = generateId();
@@ -151,19 +162,28 @@ github.get('/auth/callback', async (c) => {
         token_iv = excluded.token_iv,
         scopes = excluded.scopes,
         updated_at = datetime('now')
-    `).bind(
-      connectionId,
-      userId,
-      String(githubUser.id),
-      githubUser.login,
-      encrypted,
-      iv,
-      tokenData.scope
-    ).run();
+    `)
+      .bind(
+        connectionId,
+        userId,
+        String(githubUser.id),
+        githubUser.login,
+        encrypted,
+        iv,
+        tokenData.scope,
+      )
+      .run();
 
     // Clear state cookies
-    c.header('Set-Cookie', 'github_oauth_state=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0');
-    c.header('Set-Cookie', 'github_oauth_user=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0', { append: true });
+    c.header(
+      'Set-Cookie',
+      'github_oauth_state=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0',
+    );
+    c.header(
+      'Set-Cookie',
+      'github_oauth_user=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0',
+      { append: true },
+    );
 
     return c.redirect('/?github=connected');
   } catch (err) {
@@ -180,13 +200,15 @@ github.get('/status', async (c) => {
     SELECT id, github_username, scopes, created_at, updated_at
     FROM github_connections
     WHERE user_id = ?
-  `).bind(user.id).first<{
-    id: string;
-    github_username: string;
-    scopes: string;
-    created_at: string;
-    updated_at: string;
-  }>();
+  `)
+    .bind(user.id)
+    .first<{
+      id: string;
+      github_username: string;
+      scopes: string;
+      created_at: string;
+      updated_at: string;
+    }>();
 
   if (!result) {
     return c.json({ connected: false });
@@ -207,18 +229,24 @@ github.delete('/disconnect', async (c) => {
   // First, delete any project repositories that use this connection
   const connection = await c.env.DB.prepare(`
     SELECT id FROM github_connections WHERE user_id = ?
-  `).bind(user.id).first<{ id: string }>();
+  `)
+    .bind(user.id)
+    .first<{ id: string }>();
 
   if (connection) {
     await c.env.DB.prepare(`
       DELETE FROM project_repositories WHERE github_connection_id = ?
-    `).bind(connection.id).run();
+    `)
+      .bind(connection.id)
+      .run();
   }
 
   // Then delete the connection
   await c.env.DB.prepare(`
     DELETE FROM github_connections WHERE user_id = ?
-  `).bind(user.id).run();
+  `)
+    .bind(user.id)
+    .run();
 
   return c.json({ success: true });
 });
@@ -226,18 +254,20 @@ github.delete('/disconnect', async (c) => {
 // List user's GitHub repositories
 github.get('/repos', async (c) => {
   const user = c.get('user') as User;
-  const page = parseInt(c.req.query('page') || '1');
-  const perPage = parseInt(c.req.query('per_page') || '30');
+  const page = parseInt(c.req.query('page') || '1', 10);
+  const perPage = parseInt(c.req.query('per_page') || '30', 10);
 
   // Get the user's GitHub connection
   const connection = await c.env.DB.prepare(`
     SELECT access_token_encrypted, token_iv
     FROM github_connections
     WHERE user_id = ?
-  `).bind(user.id).first<{
-    access_token_encrypted: string;
-    token_iv: string;
-  }>();
+  `)
+    .bind(user.id)
+    .first<{
+      access_token_encrypted: string;
+      token_iv: string;
+    }>();
 
   if (!connection) {
     return c.json({ error: 'GitHub not connected' }, 400);
@@ -252,7 +282,7 @@ github.get('/repos', async (c) => {
   const accessToken = await decrypt(
     connection.access_token_encrypted,
     connection.token_iv,
-    encryptionKey
+    encryptionKey,
   );
 
   // Fetch repositories from GitHub
@@ -260,11 +290,11 @@ github.get('/repos', async (c) => {
     `https://api.github.com/user/repos?page=${page}&per_page=${perPage}&sort=updated&direction=desc`,
     {
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
         'User-Agent': 'ccdev',
-        'Accept': 'application/vnd.github.v3+json',
+        Accept: 'application/vnd.github.v3+json',
       },
-    }
+    },
   );
 
   if (!response.ok) {
@@ -272,7 +302,7 @@ github.get('/repos', async (c) => {
     return c.json({ error: 'Failed to fetch repositories' }, 500);
   }
 
-  const repos = await response.json() as GitHubRepo[];
+  const repos = (await response.json()) as GitHubRepo[];
 
   // Get pagination info from headers
   const linkHeader = response.headers.get('Link');
@@ -302,22 +332,29 @@ github.get('/repos', async (c) => {
 export async function getGitHubAccessToken(
   db: D1Database,
   userId: string,
-  encryptionKey: string
+  encryptionKey: string,
 ): Promise<string | null> {
-  const connection = await db.prepare(`
+  const connection = await db
+    .prepare(`
     SELECT access_token_encrypted, token_iv
     FROM github_connections
     WHERE user_id = ?
-  `).bind(userId).first<{
-    access_token_encrypted: string;
-    token_iv: string;
-  }>();
+  `)
+    .bind(userId)
+    .first<{
+      access_token_encrypted: string;
+      token_iv: string;
+    }>();
 
   if (!connection) {
     return null;
   }
 
-  return decrypt(connection.access_token_encrypted, connection.token_iv, encryptionKey);
+  return decrypt(
+    connection.access_token_encrypted,
+    connection.token_iv,
+    encryptionKey,
+  );
 }
 
 export default github;

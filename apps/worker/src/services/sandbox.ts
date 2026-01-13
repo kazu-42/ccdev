@@ -20,7 +20,7 @@ export class SandboxService {
 
   constructor(
     private env: Env,
-    private sandboxId: string = 'default'
+    private sandboxId: string = 'default',
   ) {
     // Use mock if Sandbox binding is not available
     this.useMock = !env.Sandbox;
@@ -35,7 +35,10 @@ export class SandboxService {
         throw new Error('Sandbox binding not available');
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.sandbox = getSandbox(this.env.Sandbox as any, this.sandboxId) as unknown as ISandbox;
+      this.sandbox = getSandbox(
+        this.env.Sandbox as any,
+        this.sandboxId,
+      ) as unknown as ISandbox;
     }
     return this.sandbox;
   }
@@ -46,7 +49,7 @@ export class SandboxService {
   async execute(
     code: string,
     language: 'javascript' | 'typescript' | 'python' | 'bash',
-    options: SandboxExecutionOptions = {}
+    options: SandboxExecutionOptions = {},
   ): Promise<ExecutionResult> {
     const startTime = Date.now();
 
@@ -114,7 +117,7 @@ export class SandboxService {
    */
   async execCommand(
     command: string,
-    options: SandboxExecutionOptions = {}
+    options: SandboxExecutionOptions = {},
   ): Promise<ExecutionResult> {
     const startTime = Date.now();
 
@@ -168,7 +171,9 @@ export class SandboxService {
       }
       return result.content;
     } catch (error) {
-      throw new Error(`Failed to read file ${path}: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to read file ${path}: ${(error as Error).message}`,
+      );
     }
   }
 
@@ -189,7 +194,9 @@ export class SandboxService {
         throw new Error(`Failed to write file: exitCode ${result.exitCode}`);
       }
     } catch (error) {
-      throw new Error(`Failed to write file ${path}: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to write file ${path}: ${(error as Error).message}`,
+      );
     }
   }
 
@@ -209,7 +216,9 @@ export class SandboxService {
       const result = await sandbox.listFiles(path);
 
       if (!result.success) {
-        throw new Error(`Failed to list directory: exitCode ${result.exitCode}`);
+        throw new Error(
+          `Failed to list directory: exitCode ${result.exitCode}`,
+        );
       }
 
       return result.files.map((f) => ({
@@ -219,7 +228,9 @@ export class SandboxService {
         modified: f.modifiedAt,
       }));
     } catch (error) {
-      throw new Error(`Failed to list files in ${path}: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to list files in ${path}: ${(error as Error).message}`,
+      );
     }
   }
 
@@ -237,10 +248,14 @@ export class SandboxService {
       const result = await sandbox.mkdir(path, { recursive });
 
       if (!result.success) {
-        throw new Error(`Failed to create directory: exitCode ${result.exitCode}`);
+        throw new Error(
+          `Failed to create directory: exitCode ${result.exitCode}`,
+        );
       }
     } catch (error) {
-      throw new Error(`Failed to create directory ${path}: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to create directory ${path}: ${(error as Error).message}`,
+      );
     }
   }
 
@@ -261,7 +276,9 @@ export class SandboxService {
         throw new Error(`Failed to delete file: exitCode ${result.exitCode}`);
       }
     } catch (error) {
-      throw new Error(`Failed to delete file ${path}: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to delete file ${path}: ${(error as Error).message}`,
+      );
     }
   }
 
@@ -276,7 +293,9 @@ export class SandboxService {
     try {
       const sandbox = await this.getSandboxInstance();
       // Use test command to check existence
-      const result = await sandbox.exec(`test -e ${this.shellEscape(path)} && echo "exists"`);
+      const result = await sandbox.exec(
+        `test -e ${this.shellEscape(path)} && echo "exists"`,
+      );
       return result.stdout.includes('exists');
     } catch {
       return false;
@@ -297,7 +316,7 @@ export class SandboxService {
   private mockExecution(
     language: string,
     code: string,
-    startTime: number
+    startTime: number,
   ): ExecutionResult {
     const preview = code.split('\n')[0];
     const hasMore = code.includes('\n');

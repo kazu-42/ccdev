@@ -1,8 +1,13 @@
 // Authentication Routes for ccdev
 import { Hono } from 'hono';
+import { generateId, userQueries } from '../db/queries';
+import {
+  authMiddleware,
+  clearAuthCookie,
+  setAuthCookie,
+  signJWT,
+} from '../middleware/auth';
 import type { Env } from '../types';
-import { userQueries, generateId } from '../db/queries';
-import { signJWT, setAuthCookie, clearAuthCookie, authMiddleware } from '../middleware/auth';
 
 const auth = new Hono<{ Bindings: Env }>();
 
@@ -27,7 +32,10 @@ auth.get('/login', (c) => {
   authUrl.searchParams.set('prompt', 'consent');
 
   // Set state cookie for CSRF protection
-  c.header('Set-Cookie', `oauth_state=${state}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`);
+  c.header(
+    'Set-Cookie',
+    `oauth_state=${state}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`,
+  );
 
   return c.redirect(authUrl.toString());
 });
@@ -72,18 +80,24 @@ auth.get('/callback', async (c) => {
       return c.redirect('/?error=token_exchange_failed');
     }
 
-    const tokens = await tokenResponse.json() as { access_token: string; id_token: string };
+    const tokens = (await tokenResponse.json()) as {
+      access_token: string;
+      id_token: string;
+    };
 
     // Get user info
-    const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-      headers: { Authorization: `Bearer ${tokens.access_token}` },
-    });
+    const userInfoResponse = await fetch(
+      'https://www.googleapis.com/oauth2/v2/userinfo',
+      {
+        headers: { Authorization: `Bearer ${tokens.access_token}` },
+      },
+    );
 
     if (!userInfoResponse.ok) {
       return c.redirect('/?error=userinfo_failed');
     }
 
-    const googleUser = await userInfoResponse.json() as {
+    const googleUser = (await userInfoResponse.json()) as {
       id: string;
       email: string;
       name: string;
@@ -121,7 +135,11 @@ auth.get('/callback', async (c) => {
     setAuthCookie(c, token);
 
     // Clear state cookie
-    c.header('Set-Cookie', 'oauth_state=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0', { append: true });
+    c.header(
+      'Set-Cookie',
+      'oauth_state=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0',
+      { append: true },
+    );
 
     return c.redirect('/');
   } catch (err) {

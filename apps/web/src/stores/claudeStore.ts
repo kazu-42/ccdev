@@ -21,10 +21,26 @@ interface ClaudeState {
 
 // Available Claude models
 export const CLAUDE_MODELS = [
-  { id: 'claude-sonnet-4-20250514', name: 'Claude 4 Sonnet', description: 'Best balance of speed and capability' },
-  { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', description: 'Previous generation sonnet' },
-  { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', description: 'Fast and efficient' },
-  { id: 'claude-opus-4-20250514', name: 'Claude 4 Opus', description: 'Most capable model' },
+  {
+    id: 'claude-sonnet-4-20250514',
+    name: 'Claude 4 Sonnet',
+    description: 'Best balance of speed and capability',
+  },
+  {
+    id: 'claude-3-5-sonnet-20241022',
+    name: 'Claude 3.5 Sonnet',
+    description: 'Previous generation sonnet',
+  },
+  {
+    id: 'claude-3-5-haiku-20241022',
+    name: 'Claude 3.5 Haiku',
+    description: 'Fast and efficient',
+  },
+  {
+    id: 'claude-opus-4-20250514',
+    name: 'Claude 4 Opus',
+    description: 'Most capable model',
+  },
 ];
 
 export const useClaudeStore = create<ClaudeState>()(
@@ -56,20 +72,23 @@ export const useClaudeStore = create<ClaudeState>()(
 
         try {
           // Test the connection with a simple message
-          const response = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': apiKey,
-              'anthropic-version': '2023-06-01',
-              'anthropic-dangerous-direct-browser-access': 'true',
+          const response = await fetch(
+            'https://api.anthropic.com/v1/messages',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': apiKey,
+                'anthropic-version': '2023-06-01',
+                'anthropic-dangerous-direct-browser-access': 'true',
+              },
+              body: JSON.stringify({
+                model,
+                max_tokens: 10,
+                messages: [{ role: 'user', content: 'Hi' }],
+              }),
             },
-            body: JSON.stringify({
-              model,
-              max_tokens: 10,
-              messages: [{ role: 'user', content: 'Hi' }],
-            }),
-          });
+          );
 
           if (response.ok) {
             set({ isConnected: true, isLoading: false, error: null });
@@ -77,12 +96,14 @@ export const useClaudeStore = create<ClaudeState>()(
           } else {
             const errorData = await response.json().catch(() => ({}));
             const errorMessage =
-              errorData.error?.message || `Connection failed: ${response.status}`;
+              errorData.error?.message ||
+              `Connection failed: ${response.status}`;
             set({ isConnected: false, isLoading: false, error: errorMessage });
             return false;
           }
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'Connection failed';
+          const message =
+            error instanceof Error ? error.message : 'Connection failed';
           set({ isConnected: false, isLoading: false, error: message });
           return false;
         }
@@ -104,6 +125,6 @@ export const useClaudeStore = create<ClaudeState>()(
         model: state.model,
         isConnected: state.isConnected,
       }),
-    }
-  )
+    },
+  ),
 );

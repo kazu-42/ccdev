@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useCodeExecution } from '@/hooks/useCodeExecution';
 import { OutputPanel } from '@/components/Output/OutputPanel';
+import { useCodeExecution } from '@/hooks/useCodeExecution';
 
 interface CodeBlockProps {
   code: string;

@@ -1,10 +1,10 @@
+import { ChatHistoryPanel } from '@/components/Chat/ChatHistoryPanel';
+import { GitPanel } from '@/components/Git';
+import { ProjectSelector } from '@/components/Project/ProjectSelector';
+import { SettingsPanel } from '@/components/Settings/SettingsPanel';
 import { useAppStore } from '@/stores/appStore';
 import { useProjectStore } from '@/stores/projectStore';
 import { FileTree } from './FileTree';
-import { ProjectSelector } from '@/components/Project/ProjectSelector';
-import { SettingsPanel } from '@/components/Settings/SettingsPanel';
-import { ChatHistoryPanel } from '@/components/Chat/ChatHistoryPanel';
-import { GitPanel } from '@/components/Git';
 
 export function Sidebar() {
   const { activeActivity, sidebarWidth } = useAppStore();
@@ -39,8 +39,18 @@ export function Sidebar() {
         </span>
         <div className="flex items-center gap-1">
           <button className="p-1 text-gray-500 hover:text-gray-300 transition-colors">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              className="w-4 h-4"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
+              />
             </svg>
           </button>
         </div>
@@ -55,18 +65,26 @@ export function Sidebar() {
             {currentProject ? (
               <>
                 <div>
-                  <div className="text-xs text-gray-500 mb-1">Current Project</div>
-                  <div className="text-white font-medium">{currentProject.name}</div>
+                  <div className="text-xs text-gray-500 mb-1">
+                    Current Project
+                  </div>
+                  <div className="text-white font-medium">
+                    {currentProject.name}
+                  </div>
                 </div>
                 {currentSession && (
                   <div>
                     <div className="text-xs text-gray-500 mb-1">Session ID</div>
-                    <div className="text-xs font-mono text-gray-400">{currentSession.terminal_session_id}</div>
+                    <div className="text-xs font-mono text-gray-400">
+                      {currentSession.terminal_session_id}
+                    </div>
                   </div>
                 )}
                 <div>
                   <div className="text-xs text-gray-500 mb-1">Sandbox ID</div>
-                  <div className="text-xs font-mono text-gray-400">{currentProject.sandbox_id}</div>
+                  <div className="text-xs font-mono text-gray-400">
+                    {currentProject.sandbox_id}
+                  </div>
                 </div>
               </>
             ) : (

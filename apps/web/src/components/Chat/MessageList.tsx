@@ -8,13 +8,17 @@ interface MessageListProps {
   isLoading: boolean;
 }
 
-export function MessageList({ messages, streamingContent, isLoading }: MessageListProps) {
+export function MessageList({
+  messages,
+  streamingContent,
+  isLoading,
+}: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, streamingContent]);
+  }, []);
 
   if (messages.length === 0 && !isLoading) {
     return (

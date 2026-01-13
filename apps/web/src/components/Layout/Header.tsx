@@ -1,5 +1,5 @@
-import { useChatStore } from '@/stores/chatStore';
 import { useAppStore } from '@/stores/appStore';
+import { useChatStore } from '@/stores/chatStore';
 import { useTerminalStore } from '@/stores/terminalStore';
 import { ModeSelector } from './ModeSelector';
 

@@ -72,7 +72,9 @@ export function FileViewer() {
             />
           </svg>
           <p className="text-sm">Select a file to view</p>
-          <p className="text-xs mt-1 text-gray-600">Use the Explorer in the sidebar</p>
+          <p className="text-xs mt-1 text-gray-600">
+            Use the Explorer in the sidebar
+          </p>
         </div>
       </div>
     );
@@ -90,7 +92,9 @@ export function FileViewer() {
                 ? 'bg-dark-bg text-white'
                 : 'text-gray-400 hover:text-white hover:bg-dark-bg/50'
             }`}
-            onClick={() => currentProject && selectFile(currentProject.id, file)}
+            onClick={() =>
+              currentProject && selectFile(currentProject.id, file)
+            }
           >
             <span className="truncate max-w-[120px]">
               {selectedFile?.path === file.path && isFileDirty && (
@@ -105,8 +109,18 @@ export function FileViewer() {
               }}
               className="p-0.5 hover:bg-dark-border rounded"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="w-3 h-3"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>

@@ -37,7 +37,11 @@ interface FileState {
   closeFile: (entry: FileEntry) => void;
   updateFileContent: (content: string) => void;
   saveFile: (projectId: string) => Promise<void>;
-  createFile: (projectId: string, path: string, content?: string) => Promise<void>;
+  createFile: (
+    projectId: string,
+    path: string,
+    content?: string,
+  ) => Promise<void>;
   createDirectory: (projectId: string, path: string) => Promise<void>;
   deleteEntry: (projectId: string, path: string) => Promise<void>;
   setError: (error: string | null) => void;
@@ -58,7 +62,7 @@ export const useFileStore = create<FileState>((set, get) => ({
     try {
       const response = await fetch(
         `${API_BASE}/api/files/projects/${projectId}/list?path=${encodeURIComponent(path)}`,
-        { credentials: 'include' }
+        { credentials: 'include' },
       );
 
       if (!response.ok) {
@@ -159,7 +163,7 @@ export const useFileStore = create<FileState>((set, get) => ({
         try {
           const response = await fetch(
             `${API_BASE}/api/files/projects/${projectId}/read?path=${encodeURIComponent(entry.path)}`,
-            { credentials: 'include' }
+            { credentials: 'include' },
           );
 
           if (response.ok) {
@@ -179,7 +183,7 @@ export const useFileStore = create<FileState>((set, get) => ({
     try {
       const response = await fetch(
         `${API_BASE}/api/files/projects/${projectId}/read?path=${encodeURIComponent(entry.path)}`,
-        { credentials: 'include' }
+        { credentials: 'include' },
       );
 
       if (!response.ok) {
@@ -207,7 +211,8 @@ export const useFileStore = create<FileState>((set, get) => ({
 
     // If closing selected file, select another one
     if (selectedFile?.path === entry.path) {
-      const newSelected = newOpenFiles.length > 0 ? newOpenFiles[newOpenFiles.length - 1] : null;
+      const newSelected =
+        newOpenFiles.length > 0 ? newOpenFiles[newOpenFiles.length - 1] : null;
       set({
         openFiles: newOpenFiles,
         selectedFile: newSelected,
@@ -228,12 +233,18 @@ export const useFileStore = create<FileState>((set, get) => ({
     if (!selectedFile || activeFileContent === null) return;
 
     try {
-      const response = await fetch(`${API_BASE}/api/files/projects/${projectId}/write`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ path: selectedFile.path, content: activeFileContent }),
-      });
+      const response = await fetch(
+        `${API_BASE}/api/files/projects/${projectId}/write`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            path: selectedFile.path,
+            content: activeFileContent,
+          }),
+        },
+      );
 
       if (!response.ok) {
         throw new Error('Failed to save file');
@@ -248,12 +259,15 @@ export const useFileStore = create<FileState>((set, get) => ({
 
   createFile: async (projectId: string, path: string, content = '') => {
     try {
-      const response = await fetch(`${API_BASE}/api/files/projects/${projectId}/write`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ path, content }),
-      });
+      const response = await fetch(
+        `${API_BASE}/api/files/projects/${projectId}/write`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ path, content }),
+        },
+      );
 
       if (!response.ok) {
         throw new Error('Failed to create file');
@@ -269,12 +283,15 @@ export const useFileStore = create<FileState>((set, get) => ({
 
   createDirectory: async (projectId: string, path: string) => {
     try {
-      const response = await fetch(`${API_BASE}/api/files/projects/${projectId}/mkdir`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ path }),
-      });
+      const response = await fetch(
+        `${API_BASE}/api/files/projects/${projectId}/mkdir`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ path }),
+        },
+      );
 
       if (!response.ok) {
         throw new Error('Failed to create directory');
@@ -295,7 +312,7 @@ export const useFileStore = create<FileState>((set, get) => ({
         {
           method: 'DELETE',
           credentials: 'include',
-        }
+        },
       );
 
       if (!response.ok) {
@@ -310,7 +327,7 @@ export const useFileStore = create<FileState>((set, get) => ({
 
       // Also close any children if it was a directory
       openFiles.forEach((f) => {
-        if (f.path.startsWith(path + '/')) {
+        if (f.path.startsWith(`${path}/`)) {
           get().closeFile(f);
         }
       });

@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import {
-  useSettingsStore,
-  AVAILABLE_CLI_TOOLS,
-  type Theme,
-  type FontSize,
-  type CLITool,
-} from '@/stores/settingsStore';
 import { useClaudeStore } from '@/stores/claudeStore';
+import {
+  AVAILABLE_CLI_TOOLS,
+  type CLITool,
+  type FontSize,
+  type Theme,
+  useSettingsStore,
+} from '@/stores/settingsStore';
 
 type SettingsTab = 'appearance' | 'editor' | 'terminal' | 'tools' | 'claude';
 
@@ -18,7 +18,13 @@ const CATEGORY_LABELS: Record<CLITool['category'], string> = {
   util: 'Utilities',
 };
 
-const CATEGORY_ORDER: CLITool['category'][] = ['cloud', 'db', 'dev', 'vcs', 'util'];
+const CATEGORY_ORDER: CLITool['category'][] = [
+  'cloud',
+  'db',
+  'dev',
+  'vcs',
+  'util',
+];
 
 export function SettingsPanel() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('tools');
@@ -37,8 +43,18 @@ export function SettingsPanel() {
       id: 'tools',
       label: 'CLI Tools',
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          className="w-4 h-4"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z"
+          />
         </svg>
       ),
     },
@@ -46,8 +62,18 @@ export function SettingsPanel() {
       id: 'terminal',
       label: 'Terminal',
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          className="w-4 h-4"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z"
+          />
         </svg>
       ),
     },
@@ -55,8 +81,18 @@ export function SettingsPanel() {
       id: 'appearance',
       label: 'Appearance',
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z" />
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          className="w-4 h-4"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z"
+          />
         </svg>
       ),
     },
@@ -64,8 +100,18 @@ export function SettingsPanel() {
       id: 'editor',
       label: 'Editor',
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          className="w-4 h-4"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"
+          />
         </svg>
       ),
     },
@@ -104,7 +150,14 @@ export function SettingsPanel() {
 }
 
 function ClaudeSettings() {
-  const { isConnected, isLoading, apiKey, setApiKey, testConnection, disconnect } = useClaudeStore();
+  const {
+    isConnected,
+    isLoading,
+    apiKey,
+    setApiKey,
+    testConnection,
+    disconnect,
+  } = useClaudeStore();
   const { yoloMode, setYoloMode } = useSettingsStore();
 
   const handleLogin = () => {
@@ -115,7 +168,9 @@ function ClaudeSettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-sm font-medium text-white mb-1">Claude Code Subscription</h3>
+        <h3 className="text-sm font-medium text-white mb-1">
+          Claude Code Subscription
+        </h3>
         <p className="text-xs text-gray-500 mb-4">
           Connect your Claude API to enable AI-powered features
         </p>
@@ -180,7 +235,9 @@ function ClaudeSettings() {
 
           {/* Help Text */}
           <div className="mt-6 p-3 bg-dark-bg/50 rounded border border-dark-border">
-            <h4 className="text-xs font-medium text-white mb-2">Need an API key?</h4>
+            <h4 className="text-xs font-medium text-white mb-2">
+              Need an API key?
+            </h4>
             <ol className="text-xs text-gray-500 space-y-1 list-decimal list-inside">
               <li>Visit console.anthropic.com</li>
               <li>Sign up or log in to your account</li>
@@ -202,9 +259,12 @@ function ClaudeSettings() {
           {/* YOLO Mode */}
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
-              <label className="text-sm text-white font-medium">YOLO Mode</label>
+              <label className="text-sm text-white font-medium">
+                YOLO Mode
+              </label>
               <p className="text-xs text-gray-500 mt-0.5">
-                Auto-approve all tool executions without confirmation. Use with caution!
+                Auto-approve all tool executions without confirmation. Use with
+                caution!
               </p>
             </div>
             <button
@@ -224,13 +284,24 @@ function ClaudeSettings() {
           {/* Warning when YOLO mode is enabled */}
           {yoloMode && (
             <div className="flex items-start gap-2 p-3 bg-orange-500/10 border border-orange-500/30 rounded">
-              <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5">
-                <path fillRule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clipRule="evenodd" />
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clipRule="evenodd"
+                />
               </svg>
               <div>
-                <p className="text-xs font-medium text-orange-400">Warning: YOLO Mode Enabled</p>
+                <p className="text-xs font-medium text-orange-400">
+                  Warning: YOLO Mode Enabled
+                </p>
                 <p className="text-xs text-orange-400/70 mt-0.5">
-                  Claude will execute code, modify files, and run commands automatically without asking for confirmation.
+                  Claude will execute code, modify files, and run commands
+                  automatically without asking for confirmation.
                 </p>
               </div>
             </div>
@@ -242,8 +313,13 @@ function ClaudeSettings() {
 }
 
 function ToolsSettings() {
-  const { selectedTools, toggleTool, customSetupScript, setCustomSetupScript, getSetupScript } =
-    useSettingsStore();
+  const {
+    selectedTools,
+    toggleTool,
+    customSetupScript,
+    setCustomSetupScript,
+    getSetupScript,
+  } = useSettingsStore();
   const [showScript, setShowScript] = useState(false);
 
   const toolsByCategory = CATEGORY_ORDER.map((category) => ({
@@ -255,7 +331,9 @@ function ToolsSettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-sm font-medium text-white mb-1">Global CLI Tools</h3>
+        <h3 className="text-sm font-medium text-white mb-1">
+          Global CLI Tools
+        </h3>
         <p className="text-xs text-gray-500 mb-4">
           Select tools to install when creating a new sandbox environment
         </p>
@@ -280,12 +358,16 @@ function ToolsSettings() {
                     />
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-white">{tool.name}</span>
+                        <span className="text-sm font-medium text-white">
+                          {tool.name}
+                        </span>
                         <code className="text-xs px-1 py-0.5 bg-dark-bg rounded text-gray-500">
                           {tool.id}
                         </code>
                       </div>
-                      <p className="text-xs text-gray-500 mt-0.5">{tool.description}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {tool.description}
+                      </p>
                     </div>
                   </label>
                 ))}
@@ -321,7 +403,11 @@ function ToolsSettings() {
             strokeWidth="2"
             className={`w-4 h-4 transition-transform ${showScript ? 'rotate-90' : ''}`}
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 5l7 7-7 7"
+            />
           </svg>
           View Generated Setup Script
         </button>
@@ -334,7 +420,8 @@ function ToolsSettings() {
 
       {/* Selected Count */}
       <div className="text-xs text-gray-500">
-        {selectedTools.length} tool{selectedTools.length !== 1 ? 's' : ''} selected
+        {selectedTools.length} tool{selectedTools.length !== 1 ? 's' : ''}{' '}
+        selected
       </div>
     </div>
   );
@@ -355,7 +442,9 @@ function TerminalSettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-sm font-medium text-white mb-4">Terminal Settings</h3>
+        <h3 className="text-sm font-medium text-white mb-4">
+          Terminal Settings
+        </h3>
 
         <div className="space-y-4">
           {/* Font Size */}
@@ -391,7 +480,9 @@ function TerminalSettings() {
 
           {/* Cursor Style */}
           <div>
-            <label className="block text-xs text-gray-500 mb-2">Cursor Style</label>
+            <label className="block text-xs text-gray-500 mb-2">
+              Cursor Style
+            </label>
             <div className="flex gap-2">
               {(['block', 'underline', 'bar'] as const).map((style) => (
                 <button
@@ -462,7 +553,9 @@ function AppearanceSettings() {
 
           {/* Font Size */}
           <div>
-            <label className="block text-xs text-gray-500 mb-2">UI Font Size</label>
+            <label className="block text-xs text-gray-500 mb-2">
+              UI Font Size
+            </label>
             <div className="flex gap-2">
               {(['small', 'medium', 'large'] as FontSize[]).map((size) => (
                 <button
@@ -486,8 +579,14 @@ function AppearanceSettings() {
 }
 
 function EditorSettings() {
-  const { tabSize, setTabSize, wordWrap, setWordWrap, showLineNumbers, setShowLineNumbers } =
-    useSettingsStore();
+  const {
+    tabSize,
+    setTabSize,
+    wordWrap,
+    setWordWrap,
+    showLineNumbers,
+    setShowLineNumbers,
+  } = useSettingsStore();
 
   return (
     <div className="space-y-6">

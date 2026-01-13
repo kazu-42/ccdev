@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { api, type User, type Project, type Permission } from '@/lib/api';
+import { api, type Permission, type Project, type User } from '@/lib/api';
 
 interface AdminStats {
   total_users: number;
@@ -68,7 +68,9 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         recentUsers: data.recent.users,
       });
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'Failed to fetch stats' });
+      set({
+        error: error instanceof Error ? error.message : 'Failed to fetch stats',
+      });
     }
   },
 
@@ -93,7 +95,8 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     } catch (error) {
       set({
         projectsLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch projects',
+        error:
+          error instanceof Error ? error.message : 'Failed to fetch projects',
       });
     }
   },
@@ -106,7 +109,10 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     } catch (error) {
       set({
         permissionsLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch permissions',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to fetch permissions',
       });
     }
   },
@@ -118,7 +124,9 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       get().fetchUsers();
       get().fetchStats();
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'Failed to update user' });
+      set({
+        error: error instanceof Error ? error.message : 'Failed to update user',
+      });
       throw error;
     }
   },
@@ -131,7 +139,9 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       }));
       get().fetchStats();
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'Failed to delete user' });
+      set({
+        error: error instanceof Error ? error.message : 'Failed to delete user',
+      });
       throw error;
     }
   },
@@ -144,7 +154,10 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       }));
       get().fetchStats();
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'Failed to delete project' });
+      set({
+        error:
+          error instanceof Error ? error.message : 'Failed to delete project',
+      });
       throw error;
     }
   },
@@ -154,7 +167,12 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       await api.createAdminPermission(data);
       get().fetchPermissions();
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'Failed to create permission' });
+      set({
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to create permission',
+      });
       throw error;
     }
   },
@@ -166,7 +184,12 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         permissions: state.permissions.filter((p) => p.id !== permissionId),
       }));
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'Failed to delete permission' });
+      set({
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to delete permission',
+      });
       throw error;
     }
   },

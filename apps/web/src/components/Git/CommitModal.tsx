@@ -80,12 +80,19 @@ export default function CommitModal({ projectId, onClose, onCommit }: Props) {
         {/* Header */}
         <div className="p-4 border-b border-gray-700 flex items-center justify-between">
           <h2 className="text-lg font-medium text-white">Commit Changes</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <button onClick={onClose} className="text-gray-400 hover:text-white">
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -98,7 +105,6 @@ export default function CommitModal({ projectId, onClose, onCommit }: Props) {
             placeholder="Commit message..."
             rows={3}
             className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            autoFocus
           />
         </div>
 
@@ -159,7 +165,11 @@ export default function CommitModal({ projectId, onClose, onCommit }: Props) {
           </button>
           <button
             onClick={handleCommit}
-            disabled={!message.trim() || isLoading || (uniqueFiles.length > 0 && !selectAll && selectedFiles.size === 0)}
+            disabled={
+              !message.trim() ||
+              isLoading ||
+              (uniqueFiles.length > 0 && !selectAll && selectedFiles.size === 0)
+            }
             className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded"
           >
             {isLoading ? 'Committing...' : 'Commit'}

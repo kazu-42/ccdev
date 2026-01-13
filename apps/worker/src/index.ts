@@ -1,21 +1,21 @@
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
-import type { Env } from './types';
 import { corsMiddleware } from './middleware/cors';
 import { errorMiddleware } from './middleware/error';
+import adminRoutes from './routes/admin';
+import authRoutes from './routes/auth';
 import { chatRouter } from './routes/chat';
 import { executeRouter } from './routes/execute';
-import { terminalRouter } from './routes/terminal';
-import authRoutes from './routes/auth';
-import projectRoutes from './routes/projects';
-import sessionRoutes from './routes/sessions';
-import adminRoutes from './routes/admin';
 import filesRoutes from './routes/files';
 import githubRoutes from './routes/github';
+import projectRoutes from './routes/projects';
+import sessionRoutes from './routes/sessions';
+import { terminalRouter } from './routes/terminal';
+import type { Env } from './types';
 
+export { Sandbox } from '@cloudflare/sandbox';
 // Re-export Durable Objects
 export { TerminalSession } from './durable-objects/TerminalSession';
-export { Sandbox } from '@cloudflare/sandbox';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -53,7 +53,7 @@ app.notFound((c) => {
       error: 'not_found',
       message: `Route ${c.req.path} not found`,
     },
-    404
+    404,
   );
 });
 

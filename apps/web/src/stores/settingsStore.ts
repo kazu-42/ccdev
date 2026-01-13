@@ -17,7 +17,8 @@ export const AVAILABLE_CLI_TOOLS: CLITool[] = [
     id: 'gh',
     name: 'GitHub CLI',
     description: 'GitHub command-line tool',
-    installCommand: 'curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null && sudo apt update && sudo apt install gh -y',
+    installCommand:
+      'curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null && sudo apt update && sudo apt install gh -y',
     checkCommand: 'gh --version',
     category: 'vcs',
   },
@@ -26,7 +27,8 @@ export const AVAILABLE_CLI_TOOLS: CLITool[] = [
     id: 'awscli',
     name: 'AWS CLI',
     description: 'Amazon Web Services command-line interface',
-    installCommand: 'curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip" && unzip -q /tmp/awscliv2.zip -d /tmp && sudo /tmp/aws/install',
+    installCommand:
+      'curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip" && unzip -q /tmp/awscliv2.zip -d /tmp && sudo /tmp/aws/install',
     checkCommand: 'aws --version',
     category: 'cloud',
   },
@@ -34,7 +36,8 @@ export const AVAILABLE_CLI_TOOLS: CLITool[] = [
     id: 'gcloud',
     name: 'Google Cloud CLI',
     description: 'Google Cloud Platform command-line tool',
-    installCommand: 'curl -fsSL https://sdk.cloud.google.com | bash -s -- --disable-prompts --install-dir=/opt',
+    installCommand:
+      'curl -fsSL https://sdk.cloud.google.com | bash -s -- --disable-prompts --install-dir=/opt',
     checkCommand: 'gcloud --version',
     category: 'cloud',
   },
@@ -83,7 +86,8 @@ export const AVAILABLE_CLI_TOOLS: CLITool[] = [
     id: 'planetscale',
     name: 'PlanetScale CLI',
     description: 'PlanetScale database CLI',
-    installCommand: 'curl -fsSL https://raw.githubusercontent.com/planetscale/cli/main/scripts/install.sh | bash',
+    installCommand:
+      'curl -fsSL https://raw.githubusercontent.com/planetscale/cli/main/scripts/install.sh | bash',
     checkCommand: 'pscale version',
     category: 'db',
   },
@@ -148,7 +152,8 @@ export const AVAILABLE_CLI_TOOLS: CLITool[] = [
     id: 'kubectl',
     name: 'kubectl',
     description: 'Kubernetes CLI',
-    installCommand: 'curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl',
+    installCommand:
+      'curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl',
     checkCommand: 'kubectl version --client',
     category: 'dev',
   },
@@ -156,7 +161,8 @@ export const AVAILABLE_CLI_TOOLS: CLITool[] = [
     id: 'terraform',
     name: 'Terraform',
     description: 'Infrastructure as Code tool',
-    installCommand: 'sudo apt-get update && sudo apt-get install -y gnupg software-properties-common && wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg && echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list && sudo apt update && sudo apt-get install terraform',
+    installCommand:
+      'sudo apt-get update && sudo apt-get install -y gnupg software-properties-common && wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg && echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list && sudo apt update && sudo apt-get install terraform',
     checkCommand: 'terraform --version',
     category: 'dev',
   },
@@ -254,7 +260,7 @@ export const useSettingsStore = create<SettingsState>()(
       getSetupScript: () => {
         const state = get();
         const tools = AVAILABLE_CLI_TOOLS.filter((tool) =>
-          state.selectedTools.includes(tool.id)
+          state.selectedTools.includes(tool.id),
         );
 
         const lines = [
@@ -282,6 +288,6 @@ export const useSettingsStore = create<SettingsState>()(
     {
       name: 'ccdev-settings-storage',
       version: 1,
-    }
-  )
+    },
+  ),
 );

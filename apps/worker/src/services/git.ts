@@ -1,8 +1,9 @@
 /**
  * Git Service - Handles Git operations via Sandbox
  */
-import { SandboxService, type SandboxExecutionOptions } from './sandbox';
-import type { Env, ExecutionResult, GitStatus, GitCommit } from '../types';
+
+import type { Env, ExecutionResult, GitCommit, GitStatus } from '../types';
+import { type SandboxExecutionOptions, SandboxService } from './sandbox';
 
 export interface GitCloneOptions {
   path?: string;
@@ -24,7 +25,7 @@ export class GitService {
    */
   private async git(
     args: string,
-    options: SandboxExecutionOptions = {}
+    options: SandboxExecutionOptions = {},
   ): Promise<ExecutionResult> {
     const env = {
       GIT_TERMINAL_PROMPT: '0',
@@ -44,7 +45,7 @@ export class GitService {
     // Set up credential helper that uses the token
     await this.git(
       `config credential.helper '!f() { echo "password=${this.accessToken}"; }; f'`,
-      { cwd: path }
+      { cwd: path },
     );
 
     // Set user identity if not already set
@@ -57,14 +58,14 @@ export class GitService {
    */
   async clone(
     repoUrl: string,
-    options: GitCloneOptions = {}
+    options: GitCloneOptions = {},
   ): Promise<ExecutionResult> {
     const path = options.path || '/workspace';
 
     // Insert token into HTTPS URL for authentication
     const authUrl = repoUrl.replace(
       'https://',
-      `https://oauth2:${this.accessToken}@`
+      `https://oauth2:${this.accessToken}@`,
     );
 
     let args = `clone ${authUrl} ${path}`;
@@ -124,12 +125,12 @@ export class GitService {
 
         const aheadMatch = line.match(/ahead (\d+)/);
         if (aheadMatch) {
-          ahead = parseInt(aheadMatch[1]);
+          ahead = parseInt(aheadMatch[1], 10);
         }
 
         const behindMatch = line.match(/behind (\d+)/);
         if (behindMatch) {
-          behind = parseInt(behindMatch[1]);
+          behind = parseInt(behindMatch[1], 10);
         }
         continue;
       }
@@ -162,7 +163,7 @@ export class GitService {
    */
   async push(
     path: string,
-    options: { force?: boolean; setUpstream?: string } = {}
+    options: { force?: boolean; setUpstream?: string } = {},
   ): Promise<ExecutionResult> {
     let args = 'push';
 
@@ -194,7 +195,7 @@ export class GitService {
   async commit(
     path: string,
     message: string,
-    files?: string[]
+    files?: string[],
   ): Promise<ExecutionResult> {
     // Stage files if specified
     await this.add(path, files);
@@ -209,7 +210,7 @@ export class GitService {
    */
   async branches(
     path: string,
-    options: { remote?: boolean; all?: boolean } = {}
+    options: { remote?: boolean; all?: boolean } = {},
   ): Promise<string[]> {
     let args = 'branch';
     if (options.all) {
@@ -249,7 +250,7 @@ export class GitService {
   async checkout(
     path: string,
     branch: string,
-    options: { create?: boolean } = {}
+    options: { create?: boolean } = {},
   ): Promise<ExecutionResult> {
     const flag = options.create ? '-b' : '';
     return this.git(`checkout ${flag} ${branch}`, { cwd: path });
@@ -263,10 +264,9 @@ export class GitService {
     const delimiter = '|||';
     const format = `%H${delimiter}%an${delimiter}%ae${delimiter}%at${delimiter}%s`;
 
-    const result = await this.git(
-      `log --format='${format}' -n ${limit}`,
-      { cwd: path }
-    );
+    const result = await this.git(`log --format='${format}' -n ${limit}`, {
+      cwd: path,
+    });
 
     if (result.exitCode !== 0) {
       throw new Error(`git log failed: ${result.stderr}`);
@@ -281,7 +281,7 @@ export class GitService {
           hash,
           author,
           email,
-          timestamp: parseInt(timestamp),
+          timestamp: parseInt(timestamp, 10),
           message,
         };
       });
@@ -292,7 +292,7 @@ export class GitService {
    */
   async diff(
     path: string,
-    options: { staged?: boolean; file?: string } = {}
+    options: { staged?: boolean; file?: string } = {},
   ): Promise<string> {
     let args = 'diff';
 
@@ -326,7 +326,7 @@ export class GitService {
    */
   async reset(
     path: string,
-    options: { hard?: boolean; files?: string[] } = {}
+    options: { hard?: boolean; files?: string[] } = {},
   ): Promise<ExecutionResult> {
     let args = 'reset';
 
@@ -335,7 +335,7 @@ export class GitService {
     }
 
     if (options.files && options.files.length > 0) {
-      args += ' -- ' + options.files.map((f) => `"${f}"`).join(' ');
+      args += ` -- ${options.files.map((f) => `"${f}"`).join(' ')}`;
     }
 
     return this.git(args, { cwd: path });
@@ -346,7 +346,7 @@ export class GitService {
    */
   async stash(
     path: string,
-    options: { message?: string; pop?: boolean; list?: boolean } = {}
+    options: { message?: string; pop?: boolean; list?: boolean } = {},
   ): Promise<ExecutionResult> {
     let args = 'stash';
 

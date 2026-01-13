@@ -16,7 +16,7 @@ export interface EncryptedData {
  */
 export async function encrypt(
   plaintext: string,
-  keyBase64: string
+  keyBase64: string,
 ): Promise<EncryptedData> {
   const keyBuffer = Uint8Array.from(atob(keyBase64), (c) => c.charCodeAt(0));
 
@@ -25,7 +25,7 @@ export async function encrypt(
     keyBuffer,
     { name: 'AES-GCM' },
     false,
-    ['encrypt']
+    ['encrypt'],
   );
 
   const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -34,7 +34,7 @@ export async function encrypt(
   const encryptedBuffer = await crypto.subtle.encrypt(
     { name: 'AES-GCM', iv },
     cryptoKey,
-    encoded
+    encoded,
   );
 
   return {
@@ -53,7 +53,7 @@ export async function encrypt(
 export async function decrypt(
   encrypted: string,
   ivBase64: string,
-  keyBase64: string
+  keyBase64: string,
 ): Promise<string> {
   const keyBuffer = Uint8Array.from(atob(keyBase64), (c) => c.charCodeAt(0));
 
@@ -62,18 +62,18 @@ export async function decrypt(
     keyBuffer,
     { name: 'AES-GCM' },
     false,
-    ['decrypt']
+    ['decrypt'],
   );
 
   const iv = Uint8Array.from(atob(ivBase64), (c) => c.charCodeAt(0));
   const encryptedBuffer = Uint8Array.from(atob(encrypted), (c) =>
-    c.charCodeAt(0)
+    c.charCodeAt(0),
   );
 
   const decryptedBuffer = await crypto.subtle.decrypt(
     { name: 'AES-GCM', iv },
     cryptoKey,
-    encryptedBuffer
+    encryptedBuffer,
   );
 
   return new TextDecoder().decode(decryptedBuffer);

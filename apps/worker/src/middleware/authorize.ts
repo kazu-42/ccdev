@@ -1,19 +1,25 @@
 // Authorization Middleware for ccdev
 import type { Context, Next } from 'hono';
-import type { Env } from '../types';
-import type { User, Permission } from '../db/types';
 import { permissionQueries, projectQueries } from '../db/queries';
+import type { Permission, User } from '../db/types';
+import type { Env } from '../types';
 
 // Admin-only middleware
 export async function adminOnly(c: Context<{ Bindings: Env }>, next: Next) {
   const user = c.get('user') as User | undefined;
 
   if (!user) {
-    return c.json({ error: 'Unauthorized', message: 'Authentication required' }, 401);
+    return c.json(
+      { error: 'Unauthorized', message: 'Authentication required' },
+      401,
+    );
   }
 
   if (user.role !== 'admin') {
-    return c.json({ error: 'Forbidden', message: 'Admin access required' }, 403);
+    return c.json(
+      { error: 'Forbidden', message: 'Admin access required' },
+      403,
+    );
   }
 
   await next();
@@ -22,13 +28,16 @@ export async function adminOnly(c: Context<{ Bindings: Env }>, next: Next) {
 // Check if user has specific permission
 export function requirePermission(
   resourceType: Permission['resource_type'],
-  action: Permission['action']
+  action: Permission['action'],
 ) {
   return async (c: Context<{ Bindings: Env }>, next: Next) => {
     const user = c.get('user') as User | undefined;
 
     if (!user) {
-      return c.json({ error: 'Unauthorized', message: 'Authentication required' }, 401);
+      return c.json(
+        { error: 'Unauthorized', message: 'Authentication required' },
+        401,
+      );
     }
 
     // Admins bypass permission checks
@@ -43,7 +52,7 @@ export function requirePermission(
       user.id,
       resourceType,
       action,
-      resourceId
+      resourceId,
     );
 
     if (!hasPermission) {
@@ -55,16 +64,25 @@ export function requirePermission(
 }
 
 // Check if user owns the project
-export async function projectOwnerOnly(c: Context<{ Bindings: Env }>, next: Next) {
+export async function projectOwnerOnly(
+  c: Context<{ Bindings: Env }>,
+  next: Next,
+) {
   const user = c.get('user') as User | undefined;
 
   if (!user) {
-    return c.json({ error: 'Unauthorized', message: 'Authentication required' }, 401);
+    return c.json(
+      { error: 'Unauthorized', message: 'Authentication required' },
+      401,
+    );
   }
 
   const projectId = c.req.param('id') || c.req.param('projectId');
   if (!projectId) {
-    return c.json({ error: 'Bad Request', message: 'Project ID required' }, 400);
+    return c.json(
+      { error: 'Bad Request', message: 'Project ID required' },
+      400,
+    );
   }
 
   // Admins can access all projects

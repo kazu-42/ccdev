@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import type { Env, ExecuteRequest } from '../types';
 import { SandboxService } from '../services/sandbox';
+import type { Env, ExecuteRequest } from '../types';
 
 const executeRouter = new Hono<{ Bindings: Env }>();
 
@@ -28,7 +28,7 @@ executeRouter.post('/', async (c) => {
         message: 'Invalid request format',
         details: result.error.flatten(),
       },
-      400
+      400,
     );
   }
 
@@ -47,7 +47,7 @@ executeRouter.post('/', async (c) => {
         message: 'Code execution timed out',
         ...executionResult,
       },
-      408
+      408,
     );
   }
 

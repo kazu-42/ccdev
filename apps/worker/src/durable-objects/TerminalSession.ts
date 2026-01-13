@@ -1,5 +1,5 @@
-import type { Env } from '../types';
 import { SandboxService } from '../services/sandbox';
+import type { Env } from '../types';
 
 interface ClientMessage {
   type: 'input' | 'resize';
@@ -25,7 +25,7 @@ export class TerminalSession {
 
   constructor(
     private readonly state: DurableObjectState,
-    private readonly env: Env
+    private readonly env: Env,
   ) {}
 
   // Getters for Phase 3 Sandbox integration
@@ -92,10 +92,15 @@ export class TerminalSession {
     });
   }
 
-  private async handleMessage(ws: WebSocket, data: string | ArrayBuffer): Promise<void> {
+  private async handleMessage(
+    ws: WebSocket,
+    data: string | ArrayBuffer,
+  ): Promise<void> {
     try {
       const message: ClientMessage =
-        typeof data === 'string' ? JSON.parse(data) : JSON.parse(new TextDecoder().decode(data));
+        typeof data === 'string'
+          ? JSON.parse(data)
+          : JSON.parse(new TextDecoder().decode(data));
 
       switch (message.type) {
         case 'input':
@@ -133,18 +138,27 @@ export class TerminalSession {
     } else if (input === '\x03') {
       // Ctrl+C
       this.inputBuffer = '';
-      this.send(ws, { type: 'output', data: '^C\r\n' + this.getPrompt() });
+      this.send(ws, { type: 'output', data: `^C\r\n${this.getPrompt()}` });
     } else if (input === '\x1b[A') {
       // Up arrow - history
-      if (this.history.length > 0 && this.historyIndex < this.history.length - 1) {
+      if (
+        this.history.length > 0 &&
+        this.historyIndex < this.history.length - 1
+      ) {
         this.historyIndex++;
-        this.replaceInputLine(ws, this.history[this.history.length - 1 - this.historyIndex]);
+        this.replaceInputLine(
+          ws,
+          this.history[this.history.length - 1 - this.historyIndex],
+        );
       }
     } else if (input === '\x1b[B') {
       // Down arrow - history
       if (this.historyIndex > 0) {
         this.historyIndex--;
-        this.replaceInputLine(ws, this.history[this.history.length - 1 - this.historyIndex]);
+        this.replaceInputLine(
+          ws,
+          this.history[this.history.length - 1 - this.historyIndex],
+        );
       } else if (this.historyIndex === 0) {
         this.historyIndex = -1;
         this.replaceInputLine(ws, '');
@@ -158,7 +172,12 @@ export class TerminalSession {
 
   private replaceInputLine(ws: WebSocket, newInput: string): void {
     // Clear current line and write new input
-    const clearLine = '\r' + this.getPrompt() + ' '.repeat(this.inputBuffer.length) + '\r' + this.getPrompt();
+    const clearLine =
+      '\r' +
+      this.getPrompt() +
+      ' '.repeat(this.inputBuffer.length) +
+      '\r' +
+      this.getPrompt();
     this.inputBuffer = newInput;
     this.send(ws, { type: 'output', data: clearLine + newInput });
   }
@@ -181,11 +200,11 @@ export class TerminalSession {
     // Built-in shell commands (emulated)
     switch (cmd) {
       case 'echo':
-        this.send(ws, { type: 'output', data: args.join(' ') + '\r\n' });
+        this.send(ws, { type: 'output', data: `${args.join(' ')}\r\n` });
         break;
 
       case 'pwd':
-        this.send(ws, { type: 'output', data: this.cwd + '\r\n' });
+        this.send(ws, { type: 'output', data: `${this.cwd}\r\n` });
         break;
 
       case 'cd':
@@ -217,7 +236,10 @@ export class TerminalSession {
         break;
 
       case 'date':
-        this.send(ws, { type: 'output', data: new Date().toUTCString() + '\r\n' });
+        this.send(ws, {
+          type: 'output',
+          data: `${new Date().toUTCString()}\r\n`,
+        });
         break;
 
       case 'env':
@@ -245,7 +267,8 @@ export class TerminalSession {
         } else {
           this.send(ws, {
             type: 'output',
-            data: `\x1b[33mccdev:\x1b[0m ${cmd}: command not found\r\n` +
+            data:
+              `\x1b[33mccdev:\x1b[0m ${cmd}: command not found\r\n` +
               `\x1b[90m(Sandbox SDK not enabled. Use 'help' for available commands)\x1b[0m\r\n`,
           });
         }
@@ -258,11 +281,11 @@ export class TerminalSession {
     } else if (dir === '..') {
       const parts = this.cwd.split('/').filter(Boolean);
       parts.pop();
-      this.cwd = '/' + parts.join('/') || '/';
+      this.cwd = `/${parts.join('/')}` || '/';
     } else if (dir.startsWith('/')) {
       this.cwd = dir;
     } else {
-      this.cwd = this.cwd === '/' ? '/' + dir : this.cwd + '/' + dir;
+      this.cwd = this.cwd === '/' ? `/${dir}` : `${this.cwd}/${dir}`;
     }
   }
 
@@ -276,7 +299,11 @@ export class TerminalSession {
       '/tmp': [],
     };
 
-    const targetDir = args[0] ? (args[0].startsWith('/') ? args[0] : this.cwd + '/' + args[0]) : this.cwd;
+    const targetDir = args[0]
+      ? args[0].startsWith('/')
+        ? args[0]
+        : `${this.cwd}/${args[0]}`
+      : this.cwd;
     const contents = files[targetDir];
 
     if (contents) {
@@ -284,9 +311,11 @@ export class TerminalSession {
         return; // Empty directory, no output
       }
       const output = args.includes('-l')
-        ? contents.map((f) => `drwxr-xr-x  1 sandbox sandbox 4096 Jan 11 10:00 ${f}`).join('\r\n')
+        ? contents
+            .map((f) => `drwxr-xr-x  1 sandbox sandbox 4096 Jan 11 10:00 ${f}`)
+            .join('\r\n')
         : contents.join('  ');
-      this.send(ws, { type: 'output', data: output + '\r\n' });
+      this.send(ws, { type: 'output', data: `${output}\r\n` });
     } else {
       this.send(ws, {
         type: 'output',
@@ -302,19 +331,27 @@ export class TerminalSession {
 
     // Emulated file contents
     const files: Record<string, string> = {
-      '/workspace/README.md': '# ccdev Sandbox\\n\\nWelcome to the ccdev sandbox environment.\\n',
-      '/workspace/package.json': '{\\n  "name": "sandbox-project",\\n  "version": "1.0.0"\\n}\\n',
+      '/workspace/README.md':
+        '# ccdev Sandbox\\n\\nWelcome to the ccdev sandbox environment.\\n',
+      '/workspace/package.json':
+        '{\\n  "name": "sandbox-project",\\n  "version": "1.0.0"\\n}\\n',
       '/workspace/src/index.ts': 'console.log("Hello from ccdev sandbox!");\\n',
-      '/workspace/src/utils.ts': 'export function greet(name: string) {\\n  return `Hello, ${name}!`;\\n}\\n',
+      '/workspace/src/utils.ts':
+        'export function greet(name: string) {\\n  return `Hello, ${name}!`;\\n}\\n',
     };
 
-    const filePath = args[0].startsWith('/') ? args[0] : this.cwd + '/' + args[0];
+    const filePath = args[0].startsWith('/')
+      ? args[0]
+      : `${this.cwd}/${args[0]}`;
     const content = files[filePath];
 
     if (content) {
       this.send(ws, { type: 'output', data: content.replace(/\\n/g, '\r\n') });
     } else {
-      this.send(ws, { type: 'output', data: `cat: ${args[0]}: No such file or directory\r\n` });
+      this.send(ws, {
+        type: 'output',
+        data: `cat: ${args[0]}: No such file or directory\r\n`,
+      });
     }
   }
 
@@ -339,10 +376,16 @@ export class TerminalSession {
 \x1b[90mNote: This is an emulated shell. Full Sandbox SDK commands
 will be available when Sandbox is enabled.\x1b[0m
 `;
-    this.send(ws, { type: 'output', data: help.trim().replace(/\n/g, '\r\n') + '\r\n' });
+    this.send(ws, {
+      type: 'output',
+      data: `${help.trim().replace(/\n/g, '\r\n')}\r\n`,
+    });
   }
 
-  private async executeSandboxCommand(ws: WebSocket, command: string): Promise<void> {
+  private async executeSandboxCommand(
+    ws: WebSocket,
+    command: string,
+  ): Promise<void> {
     try {
       // Use a short unique ID for the sandbox (8 chars like official example)
       const sandboxId = this.state.id.toString().slice(0, 8);
@@ -360,9 +403,9 @@ will be available when Sandbox is enabled.\x1b[0m
         } else if (cdArg === '..') {
           const parts = this.cwd.split('/').filter(Boolean);
           parts.pop();
-          newDir = '/' + parts.join('/') || '/';
+          newDir = `/${parts.join('/')}` || '/';
         } else {
-          newDir = this.cwd === '/' ? '/' + cdArg : this.cwd + '/' + cdArg;
+          newDir = this.cwd === '/' ? `/${cdArg}` : `${this.cwd}/${cdArg}`;
         }
 
         // Verify directory exists before changing
@@ -370,7 +413,10 @@ will be available when Sandbox is enabled.\x1b[0m
         if (exists) {
           this.cwd = newDir;
         } else {
-          this.send(ws, { type: 'output', data: `cd: ${cdArg}: No such file or directory\r\n` });
+          this.send(ws, {
+            type: 'output',
+            data: `cd: ${cdArg}: No such file or directory\r\n`,
+          });
         }
         return;
       }
@@ -380,21 +426,28 @@ will be available when Sandbox is enabled.\x1b[0m
 
       // Send output based on success/failure
       if (result.stdout) {
-        this.send(ws, { type: 'output', data: result.stdout.replace(/\n/g, '\r\n') });
+        this.send(ws, {
+          type: 'output',
+          data: result.stdout.replace(/\n/g, '\r\n'),
+        });
       }
       if (result.stderr) {
-        this.send(ws, { type: 'output', data: `\x1b[31m${result.stderr.replace(/\n/g, '\r\n')}\x1b[0m` });
+        this.send(ws, {
+          type: 'output',
+          data: `\x1b[31m${result.stderr.replace(/\n/g, '\r\n')}\x1b[0m`,
+        });
       }
 
       // Send exit code if non-zero
       if (result.exitCode !== 0) {
         this.send(ws, {
           type: 'exit',
-          exitCode: result.exitCode
+          exitCode: result.exitCode,
         });
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.send(ws, {
         type: 'error',
         data: `\x1b[31mSandbox error:\x1b[0m ${errorMessage}\r\n`,
@@ -403,7 +456,8 @@ will be available when Sandbox is enabled.\x1b[0m
   }
 
   private getPrompt(): string {
-    const shortCwd = this.cwd === '/workspace' ? '~' : this.cwd.replace('/workspace', '~');
+    const shortCwd =
+      this.cwd === '/workspace' ? '~' : this.cwd.replace('/workspace', '~');
     return `\x1b[32msandbox\x1b[0m:\x1b[34m${shortCwd}\x1b[0m$ `;
   }
 

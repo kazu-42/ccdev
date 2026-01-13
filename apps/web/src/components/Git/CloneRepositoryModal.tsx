@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useGitStore } from '@/stores/gitStore';
 import type { GitHubRepo } from '@/lib/api';
+import { useGitStore } from '@/stores/gitStore';
 
 interface Props {
   projectId: string;
@@ -29,7 +29,7 @@ export default function CloneRepositoryModal({ projectId, onClose }: Props) {
 
   const filteredRepos = searchQuery
     ? githubRepos.filter((repo) =>
-        repo.fullName.toLowerCase().includes(searchQuery.toLowerCase())
+        repo.fullName.toLowerCase().includes(searchQuery.toLowerCase()),
       )
     : githubRepos;
 
@@ -55,12 +55,19 @@ export default function CloneRepositoryModal({ projectId, onClose }: Props) {
         {/* Header */}
         <div className="p-4 border-b border-gray-700 flex items-center justify-between">
           <h2 className="text-lg font-medium text-white">Clone Repository</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <button onClick={onClose} className="text-gray-400 hover:text-white">
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -73,7 +80,6 @@ export default function CloneRepositoryModal({ projectId, onClose }: Props) {
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search repositories..."
             className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            autoFocus
           />
         </div>
 
@@ -85,7 +91,9 @@ export default function CloneRepositoryModal({ projectId, onClose }: Props) {
             </div>
           ) : filteredRepos.length === 0 ? (
             <div className="text-center py-8 text-gray-400">
-              {searchQuery ? 'No repositories found' : 'No repositories available'}
+              {searchQuery
+                ? 'No repositories found'
+                : 'No repositories available'}
             </div>
           ) : (
             <div className="space-y-2">
@@ -102,7 +110,9 @@ export default function CloneRepositoryModal({ projectId, onClose }: Props) {
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{repo.fullName}</span>
                     {repo.private && (
-                      <span className="px-1.5 py-0.5 bg-gray-600 rounded text-xs">Private</span>
+                      <span className="px-1.5 py-0.5 bg-gray-600 rounded text-xs">
+                        Private
+                      </span>
                     )}
                   </div>
                   {repo.description && (

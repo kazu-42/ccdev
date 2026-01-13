@@ -1,10 +1,10 @@
 // File System Routes for ccdev
 import { Hono } from 'hono';
-import type { Env } from '../types';
+import { projectQueries } from '../db/queries';
 import { authMiddleware } from '../middleware/auth';
 import { getCurrentUser } from '../middleware/authorize';
-import { projectQueries } from '../db/queries';
-import { SandboxService, type FileEntry } from '../services/sandbox';
+import { type FileEntry, SandboxService } from '../services/sandbox';
+import type { Env } from '../types';
 
 const files = new Hono<{ Bindings: Env }>();
 
@@ -47,8 +47,12 @@ files.get('/projects/:projectId/list', async (c) => {
 
     return c.json({ path, entries: entriesWithPath });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return c.json({ error: 'Failed to list files', message: errorMessage }, 500);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    return c.json(
+      { error: 'Failed to list files', message: errorMessage },
+      500,
+    );
   }
 });
 
@@ -75,7 +79,8 @@ files.get('/projects/:projectId/read', async (c) => {
     const content = await sandbox.readFile(path);
     return c.json({ path, content });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
     return c.json({ error: 'Failed to read file', message: errorMessage }, 404);
   }
 });
@@ -108,8 +113,12 @@ files.post('/projects/:projectId/write', async (c) => {
     await sandbox.writeFile(body.path, body.content);
     return c.json({ success: true, path: body.path });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return c.json({ error: 'Failed to write file', message: errorMessage }, 500);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    return c.json(
+      { error: 'Failed to write file', message: errorMessage },
+      500,
+    );
   }
 });
 
@@ -136,8 +145,12 @@ files.post('/projects/:projectId/mkdir', async (c) => {
     await sandbox.mkdir(body.path);
     return c.json({ success: true, path: body.path });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return c.json({ error: 'Failed to create directory', message: errorMessage }, 500);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    return c.json(
+      { error: 'Failed to create directory', message: errorMessage },
+      500,
+    );
   }
 });
 
@@ -159,7 +172,10 @@ files.delete('/projects/:projectId/delete', async (c) => {
 
   // Prevent deleting root directories
   if (path === '/' || path === '/workspace' || path === '/home') {
-    return c.json({ error: 'Forbidden', message: 'Cannot delete root directories' }, 403);
+    return c.json(
+      { error: 'Forbidden', message: 'Cannot delete root directories' },
+      403,
+    );
   }
 
   const sandboxId = project.sandbox_id || projectId.slice(0, 8);
@@ -169,7 +185,8 @@ files.delete('/projects/:projectId/delete', async (c) => {
     await sandbox.deleteFile(path);
     return c.json({ success: true, path });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
     return c.json({ error: 'Failed to delete', message: errorMessage }, 500);
   }
 });

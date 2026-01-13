@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useFileStore, type FileEntry } from '@/stores/fileStore';
+import { type FileEntry, useFileStore } from '@/stores/fileStore';
 import { useProjectStore } from '@/stores/projectStore';
 
 const FileIcon = ({ name }: { name: string }) => {
@@ -21,7 +21,11 @@ const FileIcon = ({ name }: { name: string }) => {
   };
 
   return (
-    <svg viewBox="0 0 24 24" fill="none" className={`w-4 h-4 ${iconColors[ext || ''] || 'text-gray-400'}`}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={`w-4 h-4 ${iconColors[ext || ''] || 'text-gray-400'}`}
+    >
       <path
         fill="currentColor"
         d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm4 18H6V4h7v5h5v11z"
@@ -54,7 +58,11 @@ const ChevronIcon = ({ expanded }: { expanded: boolean }) => (
     strokeWidth="2"
     className={`w-3 h-3 text-gray-500 transition-transform ${expanded ? 'rotate-90' : ''}`}
   >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M8.25 4.5l7.5 7.5-7.5 7.5"
+    />
   </svg>
 );
 
@@ -105,10 +113,16 @@ function FileTreeNode({ entry, depth, projectId }: FileTreeNodeProps) {
         }`}
         style={{ paddingLeft: `${depth * 12 + 8}px` }}
       >
-        {isFolder && !entry.loading && <ChevronIcon expanded={entry.expanded || false} />}
+        {isFolder && !entry.loading && (
+          <ChevronIcon expanded={entry.expanded || false} />
+        )}
         {isFolder && entry.loading && <LoadingSpinner />}
         {!isFolder && <span className="w-3" />}
-        {isFolder ? <FolderIcon expanded={entry.expanded || false} /> : <FileIcon name={entry.name} />}
+        {isFolder ? (
+          <FolderIcon expanded={entry.expanded || false} />
+        ) : (
+          <FileIcon name={entry.name} />
+        )}
         <span className="truncate">{entry.name}</span>
       </button>
 
@@ -130,7 +144,8 @@ function FileTreeNode({ entry, depth, projectId }: FileTreeNodeProps) {
 
 export function FileTree() {
   const { currentProject } = useProjectStore();
-  const { rootEntries, isLoading, error, loadRootDirectory, reset } = useFileStore();
+  const { rootEntries, isLoading, error, loadRootDirectory, reset } =
+    useFileStore();
   const [isCreating, setIsCreating] = useState(false);
   const [newItemName, setNewItemName] = useState('');
   const [newItemType, setNewItemType] = useState<'file' | 'folder'>('file');
@@ -213,8 +228,18 @@ export function FileTree() {
           className="p-1 text-gray-500 hover:text-gray-300 transition-colors"
           title="New File"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="w-4 h-4"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 4.5v15m7.5-7.5h-15"
+            />
           </svg>
         </button>
         <button
@@ -225,7 +250,13 @@ export function FileTree() {
           className="p-1 text-gray-500 hover:text-gray-300 transition-colors"
           title="New Folder"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="w-4 h-4"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -250,9 +281,10 @@ export function FileTree() {
                   setNewItemName('');
                 }
               }}
-              placeholder={newItemType === 'file' ? 'filename.ts' : 'folder-name'}
+              placeholder={
+                newItemType === 'file' ? 'filename.ts' : 'folder-name'
+              }
               className="flex-1 px-2 py-1 text-xs bg-dark-surface border border-dark-border rounded text-white placeholder-gray-500 focus:outline-none focus:border-primary-500"
-              autoFocus
             />
             <button
               onClick={handleCreateNew}

@@ -1,10 +1,15 @@
 // Admin Routes for ccdev
 import { Hono } from 'hono';
-import type { Env } from '../types';
-import { userQueries, projectQueries, permissionQueries, generateId } from '../db/queries';
+import {
+  generateId,
+  permissionQueries,
+  projectQueries,
+  userQueries,
+} from '../db/queries';
+import type { Permission } from '../db/types';
 import { authMiddleware } from '../middleware/auth';
 import { adminOnly } from '../middleware/authorize';
-import type { Permission } from '../db/types';
+import type { Env } from '../types';
 
 const admin = new Hono<{ Bindings: Env }>();
 
@@ -16,8 +21,8 @@ admin.use('*', adminOnly);
 
 // List all users
 admin.get('/users', async (c) => {
-  const limit = parseInt(c.req.query('limit') || '100');
-  const offset = parseInt(c.req.query('offset') || '0');
+  const limit = parseInt(c.req.query('limit') || '100', 10);
+  const offset = parseInt(c.req.query('offset') || '0', 10);
   const users = await userQueries.list(c.env.DB, limit, offset);
   return c.json({ users, limit, offset });
 });
@@ -77,8 +82,8 @@ admin.delete('/users/:id', async (c) => {
 
 // List all projects
 admin.get('/projects', async (c) => {
-  const limit = parseInt(c.req.query('limit') || '100');
-  const offset = parseInt(c.req.query('offset') || '0');
+  const limit = parseInt(c.req.query('limit') || '100', 10);
+  const offset = parseInt(c.req.query('offset') || '0', 10);
   const projects = await projectQueries.listAll(c.env.DB, limit, offset);
   return c.json({ projects, limit, offset });
 });
@@ -113,8 +118,8 @@ admin.delete('/projects/:id', async (c) => {
 
 // List all permissions
 admin.get('/permissions', async (c) => {
-  const limit = parseInt(c.req.query('limit') || '100');
-  const offset = parseInt(c.req.query('offset') || '0');
+  const limit = parseInt(c.req.query('limit') || '100', 10);
+  const offset = parseInt(c.req.query('offset') || '0', 10);
   const permissions = await permissionQueries.list(c.env.DB, limit, offset);
   return c.json({ permissions, limit, offset });
 });
@@ -129,7 +134,10 @@ admin.post('/permissions', async (c) => {
   }>();
 
   if (!body.user_id || !body.resource_type || !body.action) {
-    return c.json({ error: 'Bad Request', message: 'Missing required fields' }, 400);
+    return c.json(
+      { error: 'Bad Request', message: 'Missing required fields' },
+      400,
+    );
   }
 
   // Verify user exists
@@ -161,22 +169,30 @@ admin.delete('/permissions/:id', async (c) => {
 admin.get('/stats', async (c) => {
   // Get counts from each table
   const [usersResult, projectsResult] = await Promise.all([
-    c.env.DB.prepare('SELECT COUNT(*) as count FROM users').first<{ count: number }>(),
-    c.env.DB.prepare('SELECT COUNT(*) as count FROM projects').first<{ count: number }>(),
+    c.env.DB.prepare('SELECT COUNT(*) as count FROM users').first<{
+      count: number;
+    }>(),
+    c.env.DB.prepare('SELECT COUNT(*) as count FROM projects').first<{
+      count: number;
+    }>(),
   ]);
 
   const [sessionsResult, adminCount] = await Promise.all([
-    c.env.DB.prepare('SELECT COUNT(*) as count FROM sessions').first<{ count: number }>(),
-    c.env.DB.prepare("SELECT COUNT(*) as count FROM users WHERE role = 'admin'").first<{ count: number }>(),
+    c.env.DB.prepare('SELECT COUNT(*) as count FROM sessions').first<{
+      count: number;
+    }>(),
+    c.env.DB.prepare(
+      "SELECT COUNT(*) as count FROM users WHERE role = 'admin'",
+    ).first<{ count: number }>(),
   ]);
 
   // Get recent activity
   const recentProjects = await c.env.DB.prepare(
-    'SELECT * FROM projects ORDER BY last_accessed_at DESC NULLS LAST LIMIT 5'
+    'SELECT * FROM projects ORDER BY last_accessed_at DESC NULLS LAST LIMIT 5',
   ).all();
 
   const recentUsers = await c.env.DB.prepare(
-    'SELECT * FROM users ORDER BY created_at DESC LIMIT 5'
+    'SELECT * FROM users ORDER BY created_at DESC LIMIT 5',
   ).all();
 
   return c.json({

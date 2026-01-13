@@ -1,13 +1,13 @@
 // Authentication Middleware for ccdev
 import type { Context, Next } from 'hono';
-import type { Env } from '../types';
+import { generateId, userQueries } from '../db/queries';
 import type { User } from '../db/types';
-import { userQueries, generateId } from '../db/queries';
-import { validateAccessToken, hasAccessHeaders } from './cloudflare-access';
+import type { Env } from '../types';
+import { hasAccessHeaders, validateAccessToken } from './cloudflare-access';
 
 // JWT payload structure
 export interface JWTPayload {
-  sub: string;  // user id
+  sub: string; // user id
   email: string;
   role: 'admin' | 'user';
   exp: number;
@@ -34,7 +34,7 @@ async function getKey(): Promise<CryptoKey> {
     keyData,
     { name: 'HMAC', hash: 'SHA-256' },
     false,
-    ['sign', 'verify']
+    ['sign', 'verify'],
   );
 }
 
@@ -58,7 +58,9 @@ function base64UrlDecode(str: string): Uint8Array {
   return bytes;
 }
 
-export async function signJWT(payload: Omit<JWTPayload, 'iat' | 'exp'>): Promise<string> {
+export async function signJWT(
+  payload: Omit<JWTPayload, 'iat' | 'exp'>,
+): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const fullPayload: JWTPayload = {
     ...payload,
@@ -70,13 +72,15 @@ export async function signJWT(payload: Omit<JWTPayload, 'iat' | 'exp'>): Promise
   const encoder = new TextEncoder();
 
   const headerB64 = base64UrlEncode(encoder.encode(JSON.stringify(header)));
-  const payloadB64 = base64UrlEncode(encoder.encode(JSON.stringify(fullPayload)));
+  const payloadB64 = base64UrlEncode(
+    encoder.encode(JSON.stringify(fullPayload)),
+  );
 
   const key = await getKey();
   const signature = await crypto.subtle.sign(
     'HMAC',
     key,
-    encoder.encode(`${headerB64}.${payloadB64}`)
+    encoder.encode(`${headerB64}.${payloadB64}`),
   );
 
   return `${headerB64}.${payloadB64}.${base64UrlEncode(signature)}`;
@@ -97,13 +101,13 @@ export async function verifyJWT(token: string): Promise<JWTPayload | null> {
       'HMAC',
       key,
       signature,
-      encoder.encode(`${headerB64}.${payloadB64}`)
+      encoder.encode(`${headerB64}.${payloadB64}`),
     );
 
     if (!valid) return null;
 
     const payload: JWTPayload = JSON.parse(
-      new TextDecoder().decode(base64UrlDecode(payloadB64))
+      new TextDecoder().decode(base64UrlDecode(payloadB64)),
     );
 
     // Check expiration
@@ -138,7 +142,10 @@ function getToken(c: Context): string | null {
 }
 
 // Authentication middleware - requires valid JWT or Cloudflare Access
-export async function authMiddleware(c: Context<{ Bindings: Env }>, next: Next) {
+export async function authMiddleware(
+  c: Context<{ Bindings: Env }>,
+  next: Next,
+) {
   // 1. First try Cloudflare Access authentication
   if (hasAccessHeaders(c.req.raw)) {
     const accessPayload = await validateAccessToken(c.req.raw, c.env);
@@ -154,7 +161,7 @@ export async function authMiddleware(c: Context<{ Bindings: Env }>, next: Next) 
           email: accessPayload.email,
           name: accessPayload.email.split('@')[0],
           avatar_url: null,
-          role: 'user',  // Default role, admin can promote later
+          role: 'user', // Default role, admin can promote later
         });
       }
 
@@ -184,7 +191,10 @@ export async function authMiddleware(c: Context<{ Bindings: Env }>, next: Next) 
 
   const payload = await verifyJWT(token);
   if (!payload) {
-    return c.json({ error: 'Unauthorized', message: 'Invalid or expired token' }, 401);
+    return c.json(
+      { error: 'Unauthorized', message: 'Invalid or expired token' },
+      401,
+    );
   }
 
   // Fetch user from database
@@ -201,7 +211,10 @@ export async function authMiddleware(c: Context<{ Bindings: Env }>, next: Next) 
 }
 
 // Optional auth middleware - sets user if token present, continues otherwise
-export async function optionalAuthMiddleware(c: Context<{ Bindings: Env }>, next: Next) {
+export async function optionalAuthMiddleware(
+  c: Context<{ Bindings: Env }>,
+  next: Next,
+) {
   // 1. Try Cloudflare Access first
   if (hasAccessHeaders(c.req.raw)) {
     const accessPayload = await validateAccessToken(c.req.raw, c.env);
@@ -257,7 +270,7 @@ export function setAuthCookie(c: Context, token: string) {
   const maxAge = JWT_EXPIRY;
   c.header(
     'Set-Cookie',
-    `ccdev_token=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`
+    `ccdev_token=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`,
   );
 }
 
@@ -265,6 +278,6 @@ export function setAuthCookie(c: Context, token: string) {
 export function clearAuthCookie(c: Context) {
   c.header(
     'Set-Cookie',
-    'ccdev_token=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0'
+    'ccdev_token=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0',
   );
 }

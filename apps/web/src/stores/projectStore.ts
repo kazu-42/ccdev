@@ -13,7 +13,10 @@ interface ProjectState {
   fetchProjects: () => Promise<void>;
   setCurrentProject: (project: Project | null) => void;
   createProject: (name: string, description?: string) => Promise<Project>;
-  updateProject: (id: string, data: { name?: string; description?: string }) => Promise<Project>;
+  updateProject: (
+    id: string,
+    data: { name?: string; description?: string },
+  ) => Promise<Project>;
   deleteProject: (id: string) => Promise<void>;
   createSession: () => Promise<Session | null>;
   clearError: () => void;
@@ -46,7 +49,11 @@ export const useProjectStore = create<ProjectState>()(
             updatedCurrentProject = projects[0];
           }
 
-          set({ projects, currentProject: updatedCurrentProject, isLoading: false });
+          set({
+            projects,
+            currentProject: updatedCurrentProject,
+            isLoading: false,
+          });
 
           // If we have a current project, create/get a session
           if (updatedCurrentProject) {
@@ -55,7 +62,10 @@ export const useProjectStore = create<ProjectState>()(
         } catch (error) {
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to fetch projects',
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Failed to fetch projects',
           });
         }
       },
@@ -87,7 +97,10 @@ export const useProjectStore = create<ProjectState>()(
         } catch (error) {
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to create project',
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Failed to create project',
           });
           throw error;
         }
@@ -100,14 +113,18 @@ export const useProjectStore = create<ProjectState>()(
           const { project } = await api.updateProject(id, data);
           set((state) => ({
             projects: state.projects.map((p) => (p.id === id ? project : p)),
-            currentProject: state.currentProject?.id === id ? project : state.currentProject,
+            currentProject:
+              state.currentProject?.id === id ? project : state.currentProject,
             isLoading: false,
           }));
           return project;
         } catch (error) {
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to update project',
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Failed to update project',
           });
           throw error;
         }
@@ -123,14 +140,19 @@ export const useProjectStore = create<ProjectState>()(
 
           set({
             projects,
-            currentProject: currentProject?.id === id ? (projects[0] || null) : currentProject,
-            currentSession: currentProject?.id === id ? null : get().currentSession,
+            currentProject:
+              currentProject?.id === id ? projects[0] || null : currentProject,
+            currentSession:
+              currentProject?.id === id ? null : get().currentSession,
             isLoading: false,
           });
         } catch (error) {
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to delete project',
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Failed to delete project',
           });
           throw error;
         }
@@ -142,7 +164,9 @@ export const useProjectStore = create<ProjectState>()(
 
         try {
           // First try to get the latest session
-          const { session: latestSession } = await api.getLatestSession(currentProject.id);
+          const { session: latestSession } = await api.getLatestSession(
+            currentProject.id,
+          );
           if (latestSession && !latestSession.ended_at) {
             set({ currentSession: latestSession });
             return latestSession;
@@ -172,8 +196,10 @@ export const useProjectStore = create<ProjectState>()(
     {
       name: 'ccdev-project-storage',
       partialize: (state) => ({
-        currentProject: state.currentProject ? { id: state.currentProject.id } : null,
+        currentProject: state.currentProject
+          ? { id: state.currentProject.id }
+          : null,
       }),
-    }
-  )
+    },
+  ),
 );

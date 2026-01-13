@@ -5,14 +5,14 @@ export interface Env {
   ANTHROPIC_API_KEY: string;
 
   // Cloudflare Access configuration
-  CF_ACCESS_TEAM_DOMAIN?: string;  // e.g., https://ghive.cloudflareaccess.com
-  CF_ACCESS_POLICY_AUD?: string;   // Application Audience Tag
+  CF_ACCESS_TEAM_DOMAIN?: string; // e.g., https://ghive.cloudflareaccess.com
+  CF_ACCESS_POLICY_AUD?: string; // Application Audience Tag
 
   // GitHub OAuth configuration
   GITHUB_CLIENT_ID?: string;
   GITHUB_CLIENT_SECRET?: string;
   GITHUB_REDIRECT_URI?: string;
-  TOKEN_ENCRYPTION_KEY?: string;   // 32-byte base64 key for AES-GCM
+  TOKEN_ENCRYPTION_KEY?: string; // 32-byte base64 key for AES-GCM
 
   // KV Namespaces
   SESSIONS?: KVNamespace;
@@ -58,7 +58,12 @@ export interface ExecutionResult {
 }
 
 // SSE Event types
-export type SSEEventType = 'message' | 'tool_use' | 'tool_result' | 'done' | 'error';
+export type SSEEventType =
+  | 'message'
+  | 'tool_use'
+  | 'tool_result'
+  | 'done'
+  | 'error';
 
 export interface SSEEvent {
   event: SSEEventType;

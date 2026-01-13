@@ -41,10 +41,15 @@ export interface Permission {
 
 // Input types for creating records
 export type CreateUser = Omit<User, 'created_at' | 'updated_at'>;
-export type CreateProject = Omit<Project, 'created_at' | 'updated_at' | 'last_accessed_at'>;
+export type CreateProject = Omit<
+  Project,
+  'created_at' | 'updated_at' | 'last_accessed_at'
+>;
 export type CreateSession = Omit<Session, 'created_at' | 'ended_at'>;
 export type CreatePermission = Omit<Permission, 'created_at'>;
 
 // Update types
 export type UpdateUser = Partial<Omit<User, 'id' | 'created_at'>>;
-export type UpdateProject = Partial<Omit<Project, 'id' | 'user_id' | 'created_at'>>;
+export type UpdateProject = Partial<
+  Omit<Project, 'id' | 'user_id' | 'created_at'>
+>;

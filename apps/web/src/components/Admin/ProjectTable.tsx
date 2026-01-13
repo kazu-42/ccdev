@@ -24,9 +24,7 @@ export function ProjectTable() {
 
   if (projects.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-400">
-        No projects found
-      </div>
+      <div className="text-center py-12 text-gray-400">No projects found</div>
     );
   }
 
@@ -35,21 +33,36 @@ export function ProjectTable() {
       <table className="w-full">
         <thead>
           <tr className="text-left border-b border-dark-border">
-            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Project</th>
-            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Sandbox ID</th>
-            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Created</th>
-            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Last Accessed</th>
-            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">
+              Project
+            </th>
+            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">
+              Sandbox ID
+            </th>
+            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">
+              Created
+            </th>
+            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">
+              Last Accessed
+            </th>
+            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-dark-border">
           {projects.map((project) => (
-            <tr key={project.id} className="hover:bg-dark-hover transition-colors">
+            <tr
+              key={project.id}
+              className="hover:bg-dark-hover transition-colors"
+            >
               <td className="px-4 py-3">
                 <div>
                   <div className="text-sm text-white">{project.name}</div>
                   {project.description && (
-                    <div className="text-xs text-gray-500 truncate max-w-xs">{project.description}</div>
+                    <div className="text-xs text-gray-500 truncate max-w-xs">
+                      {project.description}
+                    </div>
                   )}
                 </div>
               </td>

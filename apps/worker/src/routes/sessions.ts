@@ -1,9 +1,9 @@
 // Session Routes for ccdev
 import { Hono } from 'hono';
-import type { Env } from '../types';
-import { sessionQueries, projectQueries } from '../db/queries';
+import { projectQueries, sessionQueries } from '../db/queries';
 import { authMiddleware } from '../middleware/auth';
 import { getCurrentUser, isAdmin } from '../middleware/authorize';
+import type { Env } from '../types';
 
 const sessions = new Hono<{ Bindings: Env }>();
 
@@ -16,7 +16,12 @@ sessions.get('/', async (c) => {
   const limit = parseInt(c.req.query('limit') || '50', 10);
   const offset = parseInt(c.req.query('offset') || '0', 10);
 
-  const userSessions = await sessionQueries.findByUserId(c.env.DB, user.id, limit, offset);
+  const userSessions = await sessionQueries.findByUserId(
+    c.env.DB,
+    user.id,
+    limit,
+    offset,
+  );
   return c.json({ sessions: userSessions });
 });
 
@@ -62,7 +67,11 @@ sessions.patch('/:id', async (c) => {
   const body = await c.req.json<{ chat_history?: string }>();
 
   if (body.chat_history !== undefined) {
-    await sessionQueries.updateChatHistory(c.env.DB, sessionId, body.chat_history);
+    await sessionQueries.updateChatHistory(
+      c.env.DB,
+      sessionId,
+      body.chat_history,
+    );
   }
 
   const updated = await sessionQueries.findById(c.env.DB, sessionId);

@@ -1,11 +1,12 @@
-import { useRef, useEffect } from 'react';
-import { useTerminal } from './useTerminal';
+import { useEffect, useRef } from 'react';
 import { useTerminalStore } from '@/stores/terminalStore';
+import { useTerminal } from './useTerminal';
 import '@xterm/xterm/css/xterm.css';
 
 export function TerminalContainer() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { sessionId, connectionStatus, error, setSessionId, reset } = useTerminalStore();
+  const { sessionId, connectionStatus, error, setSessionId, reset } =
+    useTerminalStore();
   const { connect, disconnect, fit, focus } = useTerminal(containerRef);
 
   // Generate session ID on mount
@@ -55,20 +56,20 @@ export function TerminalContainer() {
                 connectionStatus === 'connected'
                   ? 'bg-green-500'
                   : connectionStatus === 'connecting'
-                  ? 'bg-yellow-500 animate-pulse'
-                  : connectionStatus === 'error'
-                  ? 'bg-red-500'
-                  : 'bg-gray-500'
+                    ? 'bg-yellow-500 animate-pulse'
+                    : connectionStatus === 'error'
+                      ? 'bg-red-500'
+                      : 'bg-gray-500'
               }`}
             />
             <span className="text-xs text-gray-400">
               {connectionStatus === 'connected'
                 ? 'Connected'
                 : connectionStatus === 'connecting'
-                ? 'Connecting...'
-                : connectionStatus === 'error'
-                ? 'Error'
-                : 'Disconnected'}
+                  ? 'Connecting...'
+                  : connectionStatus === 'error'
+                    ? 'Error'
+                    : 'Disconnected'}
             </span>
           </div>
           {sessionId && (

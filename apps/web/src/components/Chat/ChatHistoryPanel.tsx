@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useChatStore, type ChatSession } from '@/stores/chatStore';
+import { type ChatSession, useChatStore } from '@/stores/chatStore';
 import { useProjectStore } from '@/stores/projectStore';
 
 export function ChatHistoryPanel() {
@@ -83,7 +83,11 @@ export function ChatHistoryPanel() {
             strokeWidth="2"
             className="w-4 h-4"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 4.5v15m7.5-7.5h-15"
+            />
           </svg>
           New Chat
         </button>
@@ -112,7 +116,9 @@ export function ChatHistoryPanel() {
                 key={session.id}
                 onClick={() => handleLoadSession(session)}
                 className={`w-full text-left p-3 hover:bg-dark-bg/50 transition-colors ${
-                  currentSessionId === session.id ? 'bg-dark-bg/80 border-l-2 border-primary-500' : ''
+                  currentSessionId === session.id
+                    ? 'bg-dark-bg/80 border-l-2 border-primary-500'
+                    : ''
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">

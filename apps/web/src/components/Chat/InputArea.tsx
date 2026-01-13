@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useChatStore } from '@/stores/chatStore';
 
 export function InputArea() {
@@ -13,7 +13,7 @@ export function InputArea() {
       textarea.style.height = 'auto';
       textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
     }
-  }, [input]);
+  }, []);
 
   const handleSubmit = async () => {
     const trimmed = input.trim();
