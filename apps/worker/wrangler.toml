@@ -8,6 +8,13 @@ compatibility_flags = ["nodejs_compat"]
 ENVIRONMENT = "development"
 CF_ACCESS_TEAM_DOMAIN = "https://ghive.cloudflareaccess.com"
 CF_ACCESS_POLICY_AUD = "ca61b42b-c966-40e9-9a4c-3ea9b16c982c"
+# GitHub OAuth Configuration
+GITHUB_CLIENT_ID = "Ov23licNlOsEZK9Hj3bA"
+GITHUB_REDIRECT_URI = "http://localhost:8788/api/auth/github/callback"
+
+# Secrets (set via wrangler secret put):
+# - GITHUB_CLIENT_SECRET
+# - TOKEN_ENCRYPTION_KEY (32 bytes base64)
 
 # Sandbox Container Configuration
 [[containers]]
@@ -34,6 +41,10 @@ new_sqlite_classes = ["TerminalSession"]
 tag = "v2"
 # Empty migration to maintain compatibility
 
+[[migrations]]
+tag = "v3"
+new_sqlite_classes = ["Sandbox"]
+
 
 # D1 Database
 [[d1_databases]]
@@ -49,7 +60,7 @@ database_id = "4af28394-3fcf-4c3a-bdb7-078711f54ba3"
 
 # Production environment
 [env.production]
-vars = { ENVIRONMENT = "production" }
+vars = { ENVIRONMENT = "production", GITHUB_REDIRECT_URI = "https://ccdev.ghive.io/api/auth/github/callback" }
 
 # Local development settings
 [dev]

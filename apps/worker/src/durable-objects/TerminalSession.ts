@@ -1,5 +1,5 @@
 import type { Env } from '../types';
-import { getSandbox } from '@cloudflare/sandbox';
+import { SandboxService } from '../services/sandbox';
 
 interface ClientMessage {
   type: 'input' | 'resize';
@@ -346,16 +346,37 @@ will be available when Sandbox is enabled.\x1b[0m
     try {
       // Use a short unique ID for the sandbox (8 chars like official example)
       const sandboxId = this.state.id.toString().slice(0, 8);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sandbox = getSandbox(this.env.Sandbox as any, sandboxId);
+      const sandbox = new SandboxService(this.env, sandboxId);
 
-      // Build command with cd prefix if not in default directory
-      const fullCommand = this.cwd !== '/workspace'
-        ? `cd ${this.cwd} && ${command}`
-        : command;
+      // Handle cd command separately to update cwd state
+      if (command.trim().startsWith('cd ')) {
+        const cdArg = command.trim().substring(3).trim();
+        let newDir: string;
 
-      // Use simple exec() without streaming (matches official example pattern)
-      const result = await sandbox.exec(fullCommand);
+        if (cdArg === '~' || cdArg === '') {
+          newDir = '/workspace';
+        } else if (cdArg.startsWith('/')) {
+          newDir = cdArg;
+        } else if (cdArg === '..') {
+          const parts = this.cwd.split('/').filter(Boolean);
+          parts.pop();
+          newDir = '/' + parts.join('/') || '/';
+        } else {
+          newDir = this.cwd === '/' ? '/' + cdArg : this.cwd + '/' + cdArg;
+        }
+
+        // Verify directory exists before changing
+        const exists = await sandbox.exists(newDir);
+        if (exists) {
+          this.cwd = newDir;
+        } else {
+          this.send(ws, { type: 'output', data: `cd: ${cdArg}: No such file or directory\r\n` });
+        }
+        return;
+      }
+
+      // Execute command with cwd context
+      const result = await sandbox.execCommand(command, { cwd: this.cwd });
 
       // Send output based on success/failure
       if (result.stdout) {
@@ -371,22 +392,6 @@ will be available when Sandbox is enabled.\x1b[0m
           type: 'exit',
           exitCode: result.exitCode
         });
-      }
-
-      // Update cwd if command was cd
-      if (command.trim().startsWith('cd ')) {
-        const cdArg = command.trim().substring(3).trim();
-        if (cdArg === '~' || cdArg === '') {
-          this.cwd = '/workspace';
-        } else if (cdArg.startsWith('/')) {
-          this.cwd = cdArg;
-        } else if (cdArg === '..') {
-          const parts = this.cwd.split('/').filter(Boolean);
-          parts.pop();
-          this.cwd = '/' + parts.join('/') || '/';
-        } else {
-          this.cwd = this.cwd === '/' ? '/' + cdArg : this.cwd + '/' + cdArg;
-        }
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';

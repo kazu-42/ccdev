@@ -3,12 +3,7 @@ import { useAuthStore } from '@/stores/authStore';
 
 export function LoginScreen() {
   const [email, setEmail] = useState('');
-  const { user, isLoading, error, devLogin, fetchCurrentUser, clearError } = useAuthStore();
-
-  // Try to fetch current user on mount (for Cloudflare Access auth)
-  useEffect(() => {
-    fetchCurrentUser();
-  }, [fetchCurrentUser]);
+  const { user, isLoading, error, devLogin, clearError } = useAuthStore();
 
   // Clear error when email changes
   useEffect(() => {

@@ -21,15 +21,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   error: null,
 
   fetchCurrentUser: async () => {
-    // Skip if already loading
-    if (get().isLoading) return;
+    // Skip if already loading or initialized
+    const state = get();
+    if (state.isLoading || state.isInitialized) return;
 
     set({ isLoading: true, error: null });
 
     try {
       const { user } = await api.getCurrentUser();
       set({ user, isLoading: false, isInitialized: true });
-    } catch (error) {
+    } catch {
       // User not authenticated
       set({
         user: null,

@@ -8,6 +8,12 @@ export interface Env {
   CF_ACCESS_TEAM_DOMAIN?: string;  // e.g., https://ghive.cloudflareaccess.com
   CF_ACCESS_POLICY_AUD?: string;   // Application Audience Tag
 
+  // GitHub OAuth configuration
+  GITHUB_CLIENT_ID?: string;
+  GITHUB_CLIENT_SECRET?: string;
+  GITHUB_REDIRECT_URI?: string;
+  TOKEN_ENCRYPTION_KEY?: string;   // 32-byte base64 key for AES-GCM
+
   // KV Namespaces
   SESSIONS?: KVNamespace;
 
@@ -40,7 +46,7 @@ export interface ChatRequest {
 
 export interface ExecuteRequest {
   code: string;
-  language: 'javascript' | 'typescript';
+  language: 'javascript' | 'typescript' | 'python' | 'bash';
   timeout?: number;
 }
 
@@ -64,4 +70,55 @@ export interface APIError {
   error: string;
   message: string;
   details?: Record<string, unknown>;
+}
+
+// GitHub types
+export interface GitHubConnection {
+  id: string;
+  userId: string;
+  githubUserId: string;
+  githubUsername: string;
+  scopes: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProjectRepository {
+  id: string;
+  projectId: string;
+  githubConnectionId: string;
+  repoFullName: string;
+  repoUrl: string;
+  defaultBranch: string;
+  clonePath: string;
+  lastSyncedAt: string | null;
+  createdAt: string;
+}
+
+export interface GitHubRepo {
+  id: number;
+  name: string;
+  full_name: string;
+  html_url: string;
+  clone_url: string;
+  default_branch: string;
+  private: boolean;
+  description: string | null;
+}
+
+export interface GitStatus {
+  branch: string;
+  ahead: number;
+  behind: number;
+  staged: string[];
+  modified: string[];
+  untracked: string[];
+}
+
+export interface GitCommit {
+  hash: string;
+  author: string;
+  email: string;
+  timestamp: number;
+  message: string;
 }

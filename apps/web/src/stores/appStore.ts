@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export type AppMode = 'chat' | 'terminal' | 'editor';
-export type ActivityType = 'files' | 'chat' | 'terminal' | 'settings' | null;
+export type ActivityType = 'files' | 'chat' | 'terminal' | 'settings' | 'git' | null;
 
 interface AppState {
   // Main content mode
@@ -35,11 +35,15 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'ccdev-app-storage',
-      version: 2, // Increment to clear old auth state from localStorage
+      version: 2,
       partialize: (state) => ({
         sidebarWidth: state.sidebarWidth,
         activeActivity: state.activeActivity,
       }),
+      migrate: (persistedState, version) => {
+        // Handle migration from older versions
+        return persistedState as AppState;
+      },
     }
   )
 );

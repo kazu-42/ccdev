@@ -44,8 +44,38 @@ CREATE TABLE IF NOT EXISTS permissions (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- GitHub OAuth connections (per-user)
+CREATE TABLE IF NOT EXISTS github_connections (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  github_user_id TEXT NOT NULL,
+  github_username TEXT NOT NULL,
+  access_token_encrypted TEXT NOT NULL,
+  token_iv TEXT NOT NULL,
+  scopes TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id)
+);
+
+-- Project to repository mapping
+CREATE TABLE IF NOT EXISTS project_repositories (
+  id TEXT PRIMARY KEY,
+  project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  github_connection_id TEXT NOT NULL REFERENCES github_connections(id) ON DELETE CASCADE,
+  repo_full_name TEXT NOT NULL,
+  repo_url TEXT NOT NULL,
+  default_branch TEXT NOT NULL DEFAULT 'main',
+  clone_path TEXT NOT NULL DEFAULT '/workspace',
+  last_synced_at DATETIME,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(project_id)
+);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_projects_user_id ON projects(user_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_project_id ON sessions(project_id);
 CREATE INDEX IF NOT EXISTS idx_permissions_user_id ON permissions(user_id);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_github_connections_user_id ON github_connections(user_id);
+CREATE INDEX IF NOT EXISTS idx_project_repositories_project_id ON project_repositories(project_id);

@@ -195,14 +195,14 @@ function AppRoutes() {
 }
 
 function App() {
-  const { user, isLoading, isInitialized, fetchCurrentUser } = useAuthStore();
+  const { user, isLoading, isInitialized } = useAuthStore();
+  const fetchCurrentUser = useAuthStore((state) => state.fetchCurrentUser);
 
-  // Initialize auth state on mount
+  // Initialize auth state on mount - only run once
   useEffect(() => {
-    if (!isInitialized) {
-      fetchCurrentUser();
-    }
-  }, [isInitialized, fetchCurrentUser]);
+    fetchCurrentUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Show loading screen while initializing
   if (!isInitialized || isLoading) {

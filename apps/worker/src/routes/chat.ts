@@ -130,36 +130,41 @@ async function executeTool(
 
       case 'read_file': {
         const path = input.path as string;
-        const result = await sandbox.execute(`cat "${path}"`, 'bash', { timeout: 5000 });
-        if (result.stderr && !result.stdout) {
-          return { result: `Error reading file: ${result.stderr}`, isError: true };
+        try {
+          const content = await sandbox.readFile(path);
+          return { result: content, isError: false };
+        } catch (err) {
+          return { result: `Error reading file: ${(err as Error).message}`, isError: true };
         }
-        return { result: result.stdout, isError: false };
       }
 
       case 'write_file': {
         const path = input.path as string;
         const content = input.content as string;
-        // Escape content for shell
-        const escaped = content.replace(/'/g, "'\\''");
-        const result = await sandbox.execute(
-          `mkdir -p "$(dirname "${path}")" && cat > "${path}" << 'CCDEV_EOF'\n${escaped}\nCCDEV_EOF`,
-          'bash',
-          { timeout: 5000 }
-        );
-        if (result.stderr) {
-          return { result: `Error writing file: ${result.stderr}`, isError: true };
+        try {
+          // Ensure parent directory exists
+          const dir = path.split('/').slice(0, -1).join('/');
+          if (dir) {
+            await sandbox.mkdir(dir);
+          }
+          await sandbox.writeFile(path, content);
+          return { result: `Successfully wrote to ${path}`, isError: false };
+        } catch (err) {
+          return { result: `Error writing file: ${(err as Error).message}`, isError: true };
         }
-        return { result: `Successfully wrote to ${path}`, isError: false };
       }
 
       case 'list_files': {
         const path = (input.path as string) || '.';
-        const result = await sandbox.execute(`ls -la "${path}"`, 'bash', { timeout: 5000 });
-        if (result.stderr && !result.stdout) {
-          return { result: `Error listing files: ${result.stderr}`, isError: true };
+        try {
+          const files = await sandbox.listFiles(path);
+          const formatted = files
+            .map((f) => `${f.type === 'directory' ? 'd' : '-'} ${f.name}${f.size ? ` (${f.size} bytes)` : ''}`)
+            .join('\n');
+          return { result: formatted || '(empty directory)', isError: false };
+        } catch (err) {
+          return { result: `Error listing files: ${(err as Error).message}`, isError: true };
         }
-        return { result: result.stdout, isError: false };
       }
 
       default:
@@ -212,7 +217,9 @@ chatRouter.post('/', async (c) => {
 
   const encoder = new TextEncoder();
   const client = new Anthropic({ apiKey });
-  const sandbox = new SandboxService();
+  // Initialize SandboxService with env for real Sandbox SDK integration
+  const sandboxId = `chat-${Date.now()}`;
+  const sandbox = new SandboxService(c.env, sandboxId);
 
   const stream = new ReadableStream({
     async start(controller) {

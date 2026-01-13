@@ -8,7 +8,7 @@ const executeRouter = new Hono<{ Bindings: Env }>();
 // Request validation schema
 const executeRequestSchema = z.object({
   code: z.string().min(1).max(100000),
-  language: z.enum(['javascript', 'typescript']),
+  language: z.enum(['javascript', 'typescript', 'python', 'bash']),
   timeout: z.number().min(1000).max(30000).optional(),
 });
 
@@ -35,7 +35,8 @@ executeRouter.post('/', async (c) => {
   const { code, language, timeout } = result.data;
 
   // Execute code in sandbox
-  const sandbox = new SandboxService();
+  const sandboxId = `exec-${Date.now()}`;
+  const sandbox = new SandboxService(c.env, sandboxId);
   const executionResult = await sandbox.execute(code, language, { timeout });
 
   // Check for timeout

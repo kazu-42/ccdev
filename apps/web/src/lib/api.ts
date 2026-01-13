@@ -49,6 +49,58 @@ export interface ApiError {
   message: string;
 }
 
+// GitHub types
+export interface GitHubStatus {
+  connected: boolean;
+  username?: string;
+  scopes?: string[];
+  connectedAt?: string;
+}
+
+export interface GitHubRepo {
+  id: number;
+  name: string;
+  fullName: string;
+  url: string;
+  cloneUrl: string;
+  defaultBranch: string;
+  private: boolean;
+  description: string | null;
+}
+
+export interface ProjectRepository {
+  id: string;
+  repoFullName: string;
+  repoUrl: string;
+  defaultBranch: string;
+  clonePath: string;
+  lastSyncedAt: string | null;
+  githubUsername?: string;
+}
+
+export interface GitStatus {
+  branch: string;
+  ahead: number;
+  behind: number;
+  staged: string[];
+  modified: string[];
+  untracked: string[];
+}
+
+export interface GitCommit {
+  hash: string;
+  author: string;
+  email: string;
+  timestamp: number;
+  message: string;
+}
+
+export interface GitOperationResult {
+  success: boolean;
+  stdout: string;
+  stderr: string;
+}
+
 class ApiClient {
   private async request<T>(
     endpoint: string,
@@ -192,6 +244,92 @@ class ApiClient {
 
   async deleteAdminPermission(id: string): Promise<{ success: boolean }> {
     return this.request(`/admin/permissions/${id}`, { method: 'DELETE' });
+  }
+
+  // GitHub OAuth endpoints
+  getGitHubAuthUrl(): string {
+    return `${API_BASE}/github/auth`;
+  }
+
+  async getGitHubStatus(): Promise<GitHubStatus> {
+    return this.request('/github/status');
+  }
+
+  async disconnectGitHub(): Promise<{ success: boolean }> {
+    return this.request('/github/disconnect', { method: 'DELETE' });
+  }
+
+  async getGitHubRepos(page = 1, perPage = 30): Promise<{
+    repos: GitHubRepo[];
+    page: number;
+    perPage: number;
+    hasMore: boolean;
+  }> {
+    return this.request(`/github/repos?page=${page}&per_page=${perPage}`);
+  }
+
+  // Project repository endpoints
+  async getProjectRepository(projectId: string): Promise<{ repository: ProjectRepository | null }> {
+    return this.request(`/projects/${projectId}/repository`);
+  }
+
+  async cloneRepository(
+    projectId: string,
+    data: { repoFullName: string; repoUrl: string; defaultBranch?: string; clonePath?: string }
+  ): Promise<{ success: boolean; repository: ProjectRepository }> {
+    return this.request(`/projects/${projectId}/repository`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async disconnectRepository(projectId: string): Promise<{ success: boolean }> {
+    return this.request(`/projects/${projectId}/repository`, { method: 'DELETE' });
+  }
+
+  // Git operation endpoints
+  async getGitStatus(projectId: string): Promise<{ status: GitStatus }> {
+    return this.request(`/projects/${projectId}/git/status`);
+  }
+
+  async gitPull(projectId: string): Promise<GitOperationResult> {
+    return this.request(`/projects/${projectId}/git/pull`, { method: 'POST' });
+  }
+
+  async gitPush(projectId: string, options?: { force?: boolean; setUpstream?: string }): Promise<GitOperationResult> {
+    return this.request(`/projects/${projectId}/git/push`, {
+      method: 'POST',
+      body: JSON.stringify(options || {}),
+    });
+  }
+
+  async gitCommit(projectId: string, message: string, files?: string[]): Promise<GitOperationResult> {
+    return this.request(`/projects/${projectId}/git/commit`, {
+      method: 'POST',
+      body: JSON.stringify({ message, files }),
+    });
+  }
+
+  async getGitBranches(projectId: string, all = false): Promise<{ branches: string[]; current: string }> {
+    return this.request(`/projects/${projectId}/git/branches?all=${all}`);
+  }
+
+  async gitCheckout(projectId: string, branch: string, create = false): Promise<GitOperationResult> {
+    return this.request(`/projects/${projectId}/git/checkout`, {
+      method: 'POST',
+      body: JSON.stringify({ branch, create }),
+    });
+  }
+
+  async getGitLog(projectId: string, limit = 20): Promise<{ commits: GitCommit[] }> {
+    return this.request(`/projects/${projectId}/git/log?limit=${limit}`);
+  }
+
+  async getGitDiff(projectId: string, options?: { staged?: boolean; file?: string }): Promise<{ diff: string }> {
+    const params = new URLSearchParams();
+    if (options?.staged) params.set('staged', 'true');
+    if (options?.file) params.set('file', options.file);
+    return this.request(`/projects/${projectId}/git/diff?${params}`);
   }
 }
 

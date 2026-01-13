@@ -4,6 +4,7 @@ import { FileTree } from './FileTree';
 import { ProjectSelector } from '@/components/Project/ProjectSelector';
 import { SettingsPanel } from '@/components/Settings/SettingsPanel';
 import { ChatHistoryPanel } from '@/components/Chat/ChatHistoryPanel';
+import { GitPanel } from '@/components/Git';
 
 export function Sidebar() {
   const { activeActivity, sidebarWidth } = useAppStore();
@@ -18,6 +19,7 @@ export function Sidebar() {
     chat: 'AI CHAT',
     terminal: 'TERMINAL',
     settings: 'SETTINGS',
+    git: 'SOURCE CONTROL',
   };
 
   return (
@@ -73,6 +75,7 @@ export function Sidebar() {
           </div>
         )}
         {activeActivity === 'settings' && <SettingsPanel />}
+        {activeActivity === 'git' && <GitPanel />}
       </div>
     </div>
   );
