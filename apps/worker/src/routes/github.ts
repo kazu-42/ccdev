@@ -8,8 +8,15 @@ import type { User } from '../db/types';
 
 const github = new Hono<{ Bindings: Env }>();
 
-// Apply auth middleware to all routes
-github.use('*', authMiddleware);
+// Apply auth middleware to all routes EXCEPT the callback
+// The callback is authenticated via state cookies set during /auth
+github.use('*', async (c, next) => {
+  // Skip auth for callback - it uses state cookies for authentication
+  if (c.req.path.endsWith('/auth/callback')) {
+    return next();
+  }
+  return authMiddleware(c, next);
+});
 
 // GitHub OAuth scopes
 const GITHUB_SCOPES = 'repo user:email';
@@ -54,11 +61,11 @@ github.get('/auth/callback', async (c) => {
   const error = c.req.query('error');
 
   if (error) {
-    return c.redirect('/settings?github=error&reason=' + encodeURIComponent(error));
+    return c.redirect('/?github=error&reason=' + encodeURIComponent(error));
   }
 
   if (!code || !state) {
-    return c.redirect('/settings?github=error&reason=invalid_callback');
+    return c.redirect('/?github=error&reason=invalid_callback');
   }
 
   // Verify state
@@ -67,12 +74,12 @@ github.get('/auth/callback', async (c) => {
   const userMatch = cookie?.match(/github_oauth_user=([^;]+)/);
 
   if (!stateMatch || stateMatch[1] !== state) {
-    return c.redirect('/settings?github=error&reason=invalid_state');
+    return c.redirect('/?github=error&reason=invalid_state');
   }
 
   const userId = userMatch?.[1];
   if (!userId) {
-    return c.redirect('/settings?github=error&reason=no_user');
+    return c.redirect('/?github=error&reason=no_user');
   }
 
   try {
@@ -92,7 +99,7 @@ github.get('/auth/callback', async (c) => {
 
     if (!tokenResponse.ok) {
       console.error('GitHub token exchange failed:', await tokenResponse.text());
-      return c.redirect('/settings?github=error&reason=token_exchange_failed');
+      return c.redirect('/?github=error&reason=token_exchange_failed');
     }
 
     const tokenData = await tokenResponse.json() as {
@@ -103,7 +110,7 @@ github.get('/auth/callback', async (c) => {
     };
 
     if (tokenData.error) {
-      return c.redirect('/settings?github=error&reason=' + encodeURIComponent(tokenData.error));
+      return c.redirect('/?github=error&reason=' + encodeURIComponent(tokenData.error));
     }
 
     // Get GitHub user info
@@ -116,7 +123,7 @@ github.get('/auth/callback', async (c) => {
     });
 
     if (!userResponse.ok) {
-      return c.redirect('/settings?github=error&reason=user_fetch_failed');
+      return c.redirect('/?github=error&reason=user_fetch_failed');
     }
 
     const githubUser = await userResponse.json() as {
@@ -127,7 +134,7 @@ github.get('/auth/callback', async (c) => {
     // Encrypt the access token
     const encryptionKey = c.env.TOKEN_ENCRYPTION_KEY;
     if (!encryptionKey) {
-      return c.redirect('/settings?github=error&reason=encryption_not_configured');
+      return c.redirect('/?github=error&reason=encryption_not_configured');
     }
 
     const { encrypted, iv } = await encrypt(tokenData.access_token, encryptionKey);
@@ -158,10 +165,10 @@ github.get('/auth/callback', async (c) => {
     c.header('Set-Cookie', 'github_oauth_state=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0');
     c.header('Set-Cookie', 'github_oauth_user=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0', { append: true });
 
-    return c.redirect('/settings?github=connected');
+    return c.redirect('/?github=connected');
   } catch (err) {
     console.error('GitHub OAuth callback error:', err);
-    return c.redirect('/settings?github=error&reason=callback_failed');
+    return c.redirect('/?github=error&reason=callback_failed');
   }
 });
 
