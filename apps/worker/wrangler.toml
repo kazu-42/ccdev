@@ -43,7 +43,7 @@ tag = "v2"
 
 [[migrations]]
 tag = "v3"
-new_sqlite_classes = ["Sandbox"]
+# Sandbox uses containers, no SQLite migration needed
 
 
 # D1 Database

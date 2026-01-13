@@ -40,7 +40,7 @@ export const useAppStore = create<AppState>()(
         sidebarWidth: state.sidebarWidth,
         activeActivity: state.activeActivity,
       }),
-      migrate: (persistedState, version) => {
+      migrate: (persistedState, _version) => {
         // Handle migration from older versions
         return persistedState as AppState;
       },
